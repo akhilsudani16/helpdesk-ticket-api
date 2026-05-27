@@ -13,14 +13,19 @@ return new class extends Migration
     {
         Schema::create('tickets', function (Blueprint $table) {
             $table->id();
-            $table->integer('user_id');
-            $table->foreignId('assigned_to')->nullable();
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('assigned_to')->nullable()->constrained('users')->onDelete('set null');
             $table->string('title');
             $table->text('description');
             $table->enum('status', ['open', 'in_progress', 'resolved', 'closed']);
-            $table->enum('priority',['low', 'medium', 'high', 'urgent']);
+            $table->enum('priority', ['low', 'medium', 'high', 'urgent']);
+            $table->softDeletes();
             $table->timestamps();
 
+            $table->index('user_id');
+            $table->index('assigned_to');
+            $table->index('status');
+            $table->index('priority');
         });
     }
 
@@ -29,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('ticket');
+        Schema::dropIfExists('tickets');
     }
 };

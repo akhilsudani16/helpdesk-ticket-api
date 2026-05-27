@@ -13,11 +13,14 @@ return new class extends Migration
     {
         Schema::create('ticket_comments', function (Blueprint $table) {
             $table->id();
-            $table->integer('ticket_id');
-            $table->integer('user_id');
+            $table->foreignId('ticket_id')->constrained('tickets')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->text('body');
             $table->boolean('is_internal')->default(false);
             $table->timestamps();
+
+            $table->index('ticket_id');
+            $table->index('user_id');
         });
     }
 
@@ -26,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('ticket_comment');
+        Schema::dropIfExists('ticket_comments');
     }
 };

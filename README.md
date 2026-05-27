@@ -96,3 +96,7 @@ The Laravel framework is open-sourced software licensed under the [MIT license](
 ## 1. how a future /api/v2 could be introduced without breaking existing clients.
  - Create a new routes group for the new version of the API, and add a new version number to the appserviceprovider.php file as the new version. So whenever a new version is released, like /api/v2, so as not to break existing clients.
  - Create a new controller for the new version of the API,
+
+---
+## Tasks 3
+## 1. Include token expiration awareness
