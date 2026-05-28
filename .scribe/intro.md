@@ -1,6 +1,6 @@
 # Introduction
 
-
+Helpdesk Ticket API - A production-style REST API for managing support tickets
 
 <aside>
     <strong>Base URL</strong>: <code>http://helpdesk-ticket-api.test</code>

@@ -15,18 +15,18 @@ use Illuminate\Http\Request;
 
 /**
  * @group Tickets
- * 
+ *
  * APIs for managing support tickets
  */
 class TicketController extends Controller
 {
     /**
      * List tickets
-     * 
+     *
      * Get a paginated list of tickets with optional filtering and sorting.
-     * 
+     *
      * @authenticated
-     * 
+     *
      * @queryParam include string Comma-separated list of relationships to include (customer,assignedAgent,comments). Example: customer,comments
      * @queryParam filter[status] string Filter by status. Example: open
      * @queryParam filter[priority] string Filter by priority. Example: high
@@ -42,34 +42,28 @@ class TicketController extends Controller
         $this->authorize('viewAny', Ticket::class);
 
         $user = $request->user();
-        
-        // Start query
+
         $query = Ticket::query();
 
-        // Always load customer and assignedAgent for summaries
         $query->with(['customer', 'assignedAgent']);
 
-        // Customers can only see their own tickets
         if ($user->isCustomer()) {
             $query->where('user_id', $user->id);
-            
-            // Prevent customers from filtering by other customer IDs
+
+            //TODO - check if customer show some filter and same for agent and admin
+
             if ($request->has('filter.customer_id') && $request->input('filter.customer_id') != $user->id) {
                 return ApiResponse::forbidden('You cannot view other customers\' tickets.');
             }
         }
 
-        // Apply filters
         $filter = new TicketFilter($query, $request);
         $query = $filter->apply();
 
-        // Apply sorting
         $this->applySorting($query, $request);
 
-        // Load additional relationships based on include parameter
         $this->loadIncludes($query, $request);
 
-        // Paginate results
         $perPage = $request->query('per_page', 15);
         $tickets = $query->paginate($perPage);
 
@@ -78,11 +72,11 @@ class TicketController extends Controller
 
     /**
      * Create ticket
-     * 
+     *
      * Create a new support ticket.
-     * 
+     *
      * @authenticated
-     * 
+     *
      * @bodyParam title string required Ticket title (5-120 characters). Example: Payment failed
      * @bodyParam description string required Ticket description (min 20 characters). Example: I paid for the plan, but my account is not upgraded.
      * @bodyParam priority string required Priority level. Example: high
@@ -95,20 +89,16 @@ class TicketController extends Controller
         $user = $request->user();
         $data = $request->validated();
 
-        // Handle user_id for ticket creation
         if (isset($data['user_id'])) {
-            // Only admin with create-any ability can create tickets for other users
             if (!$user->can('createAny', Ticket::class)) {
                 return ApiResponse::forbidden('You cannot create tickets for other users.');
             }
         } else {
-            // Default to current user
             $data['user_id'] = $user->id;
         }
 
         $ticket = Ticket::create($data);
 
-        // Load customer and assignedAgent for response
         $ticket->load(['customer', 'assignedAgent']);
 
         return ApiResponse::success(
@@ -120,11 +110,11 @@ class TicketController extends Controller
 
     /**
      * Show ticket
-     * 
+     *
      * Get details of a specific ticket.
-     * 
+     *
      * @authenticated
-     * 
+     *
      * @urlParam ticket integer required The ticket ID. Example: 1
      * @queryParam include string Comma-separated list of relationships to include. Example: customer,comments
      */
@@ -132,10 +122,8 @@ class TicketController extends Controller
     {
         $this->authorize('view', $ticket);
 
-        // Always load customer and assignedAgent for summaries
         $ticket->load(['customer', 'assignedAgent']);
 
-        // Load additional relationships based on include parameter
         $this->loadIncludesForModel($ticket, $request);
 
         return ApiResponse::success(new TicketResource($ticket));
@@ -143,11 +131,11 @@ class TicketController extends Controller
 
     /**
      * Update ticket (PATCH)
-     * 
+     *
      * Partially update a ticket. Only provided fields will be updated.
-     * 
+     *
      * @authenticated
-     * 
+     *
      * @urlParam ticket integer required The ticket ID. Example: 1
      * @bodyParam title string Ticket title (5-120 characters). Example: Payment issue resolved
      * @bodyParam description string Ticket description (min 20 characters). Example: Updated description
@@ -161,7 +149,6 @@ class TicketController extends Controller
 
         $ticket->update($request->validated());
 
-        // Load customer and assignedAgent for response
         $ticket->load(['customer', 'assignedAgent']);
 
         return ApiResponse::success(
@@ -172,11 +159,11 @@ class TicketController extends Controller
 
     /**
      * Replace ticket (PUT)
-     * 
+     *
      * Fully replace a ticket. All fields are required.
-     * 
+     *
      * @authenticated
-     * 
+     *
      * @urlParam ticket integer required The ticket ID. Example: 1
      * @bodyParam title string required Ticket title (5-120 characters). Example: Payment failed
      * @bodyParam description string required Ticket description (min 20 characters). Example: Full description
@@ -189,15 +176,13 @@ class TicketController extends Controller
         $this->authorize('update', $ticket);
 
         $user = $request->user();
-        
-        // Customers cannot use PUT to update tickets
+
         if ($user->isCustomer()) {
             return ApiResponse::forbidden('Customers must use PATCH for partial updates.');
         }
 
         $ticket->update($request->validated());
 
-        // Load customer and assignedAgent for response
         $ticket->load(['customer', 'assignedAgent']);
 
         return ApiResponse::success(
@@ -208,11 +193,11 @@ class TicketController extends Controller
 
     /**
      * Delete ticket
-     * 
+     *
      * Delete a ticket. Customers can only delete their own open tickets.
-     * 
+     *
      * @authenticated
-     * 
+     *
      * @urlParam ticket integer required The ticket ID. Example: 1
      */
     public function destroy(Ticket $ticket)
@@ -230,10 +215,12 @@ class TicketController extends Controller
     private function applySorting($query, Request $request): void
     {
         $sortParam = $request->query('sort');
-        
+
         if (!$sortParam) {
             return;
         }
+
+        // TODO - create proper sorting
 
         $allowedSorts = ['created_at', 'updated_at', 'priority', 'status'];
         $sorts = explode(',', $sortParam);
@@ -262,7 +249,7 @@ class TicketController extends Controller
     {
         $includes = $request->query('include', '');
         $includesArray = array_filter(explode(',', $includes));
-        
+
         $allowedIncludes = ['customer', 'assignedAgent', 'comments'];
         $validIncludes = [];
 
@@ -288,7 +275,7 @@ class TicketController extends Controller
     {
         $includes = $request->query('include', '');
         $includesArray = array_filter(explode(',', $includes));
-        
+
         $allowedIncludes = ['customer', 'assignedAgent', 'comments'];
 
         foreach ($includesArray as $include) {

@@ -39,9 +39,9 @@ test('customer can create own ticket', function () {
 test('customer cannot view another customer ticket', function () {
     $customer1 = User::factory()->customer()->create();
     $customer2 = User::factory()->customer()->create();
-    
+
     $ticket = Ticket::factory()->create(['user_id' => $customer1->id]);
-    
+
     $token = $customer2->createToken('Test', ['tickets:view'])->plainTextToken;
 
     $response = $this->withToken($token)
@@ -53,9 +53,9 @@ test('customer cannot view another customer ticket', function () {
 test('admin can view all tickets', function () {
     $admin = User::factory()->admin()->create();
     $customer = User::factory()->customer()->create();
-    
+
     $ticket = Ticket::factory()->create(['user_id' => $customer->id]);
-    
+
     $token = $admin->createToken('Test', ['tickets:view'])->plainTextToken;
 
     $response = $this->withToken($token)
@@ -70,7 +70,7 @@ test('admin can view all tickets', function () {
 test('customer cannot update status', function () {
     $customer = User::factory()->customer()->create();
     $ticket = Ticket::factory()->create(['user_id' => $customer->id, 'status' => 'open']);
-    
+
     $token = $customer->createToken('Test', ['tickets:view', 'tickets:update'])->plainTextToken;
 
     $response = $this->withToken($token)
@@ -86,13 +86,13 @@ test('customer cannot update status', function () {
 test('agent can update assigned ticket', function () {
     $agent = User::factory()->agent()->create();
     $customer = User::factory()->customer()->create();
-    
+
     $ticket = Ticket::factory()->create([
         'user_id' => $customer->id,
         'assigned_to' => $agent->id,
         'status' => 'open',
     ]);
-    
+
     $token = $agent->createToken('Test', ['tickets:view', 'tickets:update'])->plainTextToken;
 
     $response = $this->withToken($token)
@@ -101,7 +101,7 @@ test('agent can update assigned ticket', function () {
         ]);
 
     $response->assertStatus(200);
-    
+
     $ticket->refresh();
     expect($ticket->status)->toBe('in_progress');
 });
@@ -109,12 +109,12 @@ test('agent can update assigned ticket', function () {
 test('agent cannot update unassigned ticket', function () {
     $agent = User::factory()->agent()->create();
     $customer = User::factory()->customer()->create();
-    
+
     $ticket = Ticket::factory()->create([
         'user_id' => $customer->id,
         'assigned_to' => null,
     ]);
-    
+
     $token = $agent->createToken('Test', ['tickets:view', 'tickets:update'])->plainTextToken;
 
     $response = $this->withToken($token)
@@ -131,14 +131,14 @@ test('customer can delete own open ticket', function () {
         'user_id' => $customer->id,
         'status' => 'open',
     ]);
-    
+
     $token = $customer->createToken('Test', ['tickets:view', 'tickets:delete'])->plainTextToken;
 
     $response = $this->withToken($token)
         ->deleteJson("/api/v1/tickets/{$ticket->id}");
 
     $response->assertStatus(200);
-    
+
     $this->assertSoftDeleted('tickets', ['id' => $ticket->id]);
 });
 
@@ -148,7 +148,7 @@ test('customer cannot delete closed ticket', function () {
         'user_id' => $customer->id,
         'status' => 'closed',
     ]);
-    
+
     $token = $customer->createToken('Test', ['tickets:view', 'tickets:delete'])->plainTextToken;
 
     $response = $this->withToken($token)
@@ -165,16 +165,14 @@ test('include parameter loads comments', function () {
         'body' => 'Test comment',
         'is_internal' => false,
     ]);
-    
+
     $token = $customer->createToken('Test', ['tickets:view'])->plainTextToken;
 
     $response = $this->withToken($token)
         ->getJson("/api/v1/tickets/{$ticket->id}?include=comments");
 
     $response->assertStatus(200);
-    
-    // The response has structure: { "status": "success", "data": { ...ticket resource... } }
-    // And the ticket resource should have comments when include=comments is used
+
     $json = $response->json();
     expect($json['status'])->toBe('success');
     expect($json['data'])->toHaveKey('comments');
@@ -184,14 +182,14 @@ test('filtering by status works', function () {
     $customer = User::factory()->customer()->create();
     Ticket::factory()->create(['user_id' => $customer->id, 'status' => 'open']);
     Ticket::factory()->create(['user_id' => $customer->id, 'status' => 'closed']);
-    
+
     $token = $customer->createToken('Test', ['tickets:view'])->plainTextToken;
 
     $response = $this->withToken($token)
         ->getJson('/api/v1/tickets?filter[status]=open');
 
     $response->assertStatus(200);
-    
+
     $data = $response->json('data');
     foreach ($data as $ticket) {
         expect($ticket['status'])->toBe('open');
@@ -203,14 +201,14 @@ test('sorting descending by created_at works', function () {
     $ticket1 = Ticket::factory()->create(['user_id' => $customer->id, 'created_at' => now()->subDays(2)]);
     $ticket2 = Ticket::factory()->create(['user_id' => $customer->id, 'created_at' => now()->subDay()]);
     $ticket3 = Ticket::factory()->create(['user_id' => $customer->id, 'created_at' => now()]);
-    
+
     $token = $customer->createToken('Test', ['tickets:view'])->plainTextToken;
 
     $response = $this->withToken($token)
         ->getJson('/api/v1/tickets?sort=-created_at');
 
     $response->assertStatus(200);
-    
+
     $data = $response->json('data');
     expect($data[0]['id'])->toBe($ticket3->id);
 });
@@ -261,7 +259,7 @@ test('invalid date format for created_after returns 400', function () {
 test('customer cannot send forbidden fields in update request', function () {
     $customer = User::factory()->customer()->create();
     $ticket = Ticket::factory()->create(['user_id' => $customer->id, 'status' => 'open']);
-    
+
     $token = $customer->createToken('Test', ['tickets:view', 'tickets:update'])->plainTextToken;
 
     $response = $this->withToken($token)
@@ -273,8 +271,7 @@ test('customer cannot send forbidden fields in update request', function () {
         ]);
 
     $response->assertStatus(200);
-    
-    // Verify forbidden fields were not updated
+
     $ticket->refresh();
     expect($ticket->status)->toBe('open');
     expect($ticket->title)->toBe('Updated title for testing validation');

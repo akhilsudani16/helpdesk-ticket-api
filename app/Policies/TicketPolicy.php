@@ -24,17 +24,14 @@ class TicketPolicy
             return false;
         }
 
-        // Admin can view all tickets
         if ($user->isAdmin()) {
             return true;
         }
 
-        // Agent can view assigned tickets
         if ($user->isAgent() && $ticket->assigned_to === $user->id) {
             return true;
         }
 
-        // Customer can view their own tickets
         return $ticket->user_id === $user->id;
     }
 
@@ -63,17 +60,14 @@ class TicketPolicy
             return false;
         }
 
-        // Admin can update any ticket
         if ($user->isAdmin() && $user->tokenCan('tickets:update-any')) {
             return true;
         }
 
-        // Agent can update assigned tickets
         if ($user->isAgent() && $ticket->assigned_to === $user->id) {
             return true;
         }
 
-        // Customer can update their own tickets
         return $ticket->user_id === $user->id;
     }
 
@@ -94,12 +88,10 @@ class TicketPolicy
             return false;
         }
 
-        // Admin can delete any ticket
         if ($user->isAdmin() && $user->tokenCan('tickets:delete-any')) {
             return true;
         }
 
-        // Customer can delete their own ticket only if status is 'open'
         if ($user->isCustomer() && $ticket->user_id === $user->id && $ticket->status === 'open') {
             return true;
         }

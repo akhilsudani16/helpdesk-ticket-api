@@ -33,49 +33,31 @@ class User extends Authenticatable
         ];
     }
 
-    /**
-     * Get the tickets created by this user.
-     */
     public function tickets(): HasMany
     {
         return $this->hasMany(Ticket::class, 'user_id');
     }
 
-    /**
-     * Get the tickets assigned to this user (agent).
-     */
     public function assignedTickets(): HasMany
     {
         return $this->hasMany(Ticket::class, 'assigned_to');
     }
 
-    /**
-     * Get the comments created by this user.
-     */
     public function comments(): HasMany
     {
         return $this->hasMany(TicketComment::class);
     }
 
-    /**
-     * Check if user is an admin.
-     */
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
     }
 
-    /**
-     * Check if user is an agent.
-     */
     public function isAgent(): bool
     {
         return $this->role === 'agent';
     }
 
-    /**
-     * Check if user is a customer.
-     */
     public function isCustomer(): bool
     {
         return $this->role === 'customer';

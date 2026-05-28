@@ -1,87 +1,32 @@
-# Helpdesk Ticket API
-
-A production-style REST API built with Laravel for managing support tickets. This API demonstrates best practices including JSON API response design, API versioning, token authentication, authorization policies, filtering, sorting, and comprehensive documentation.
-
-## Table of Contents
-
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Project Setup](#project-setup)
-- [Environment Variables](#environment-variables)
-- [Database Setup](#database-setup)
-- [Running the API](#running-the-api)
-- [Running Tests](#running-tests)
-- [API Documentation](#api-documentation)
-- [Test Users](#test-users)
-- [Token Abilities](#token-abilities)
-- [API Versioning](#api-versioning)
-- [Rate Limiting](#rate-limiting)
-- [Postman Testing](#postman-testing)
-- [Principle of Least Privilege](#principle-of-least-privilege)
-
-## Features
-
-- ✅ JSON API response design with consistent format
-- ✅ API versioning (`/api/v1`)
-- ✅ Laravel Sanctum token authentication
-- ✅ Token revocation and expiration awareness
-- ✅ API Resources and Resource Collections
-- ✅ Conditional includes for relationships
-- ✅ Query filters and sorting
-- ✅ Nested resources (ticket comments)
-- ✅ POST, PUT, PATCH, DELETE handling
-- ✅ Policies and token abilities
-- ✅ Granular permission rules
-- ✅ Consistent JSON error responses
-- ✅ API documentation using Scribe
-- ✅ Rate limiting
-- ✅ Health check endpoint
-- ✅ Soft deletes for tickets
-
-## Tech Stack
-
-- **Laravel**: 13.x
-- **PHP**: 8.3+
-- **Database**: MySQL or SQLite
-- **Authentication**: Laravel Sanctum
-- **Testing**: Pest
-- **Documentation**: Scribe
-
 ## Project Setup
 
-1. **Clone the repository** (or extract the ZIP file)
-
+1. **Create a new Laravel project** 
 ```bash
-cd helpdesk-api
+Laravel new helpdesk-ticket-api
+```
+```bash
+cd helpdesk-ticket-api
 ```
 
-2. **Install PHP dependencies**
+2.   **Install PHP dependencies**
 
 ```bash
 composer install
 ```
 
-3. **Install Node dependencies** (optional, for asset compilation)
-
-```bash
-npm install
-```
-
-4. **Copy environment file**
+3. **Copy environment file**
 
 ```bash
 copy .env.example .env
 ```
 
-5. **Generate application key**
+4. **Generate application key**
 
 ```bash
 php artisan key:generate
 ```
 
 ## Environment Variables
-
-Update your `.env` file with the following required variables:
 
 ```env
 APP_NAME="Helpdesk Ticket API"
@@ -98,41 +43,23 @@ DB_DATABASE=helpdesk_ticket_api
 DB_USERNAME=root
 DB_PASSWORD=
 
-# For SQLite (alternative)
-# DB_CONNECTION=sqlite
-# DB_DATABASE=C:\path\to\database\database.sqlite
-
-# Sanctum Configuration
-SANCTUM_STATEFUL_DOMAINS=localhost,localhost:8000,127.0.0.1,127.0.0.1:8000
 ```
-
-### Token Expiration
-
-Laravel Sanctum tokens do not expire by default. To configure token expiration, you can:
-
-1. Set expiration in `config/sanctum.php`:
-```php
-'expiration' => 60, // minutes
-```
-
-2. Or manually expire tokens using the `expires_at` column in the `personal_access_tokens` table.
 
 ## Database Setup
 
-1. **Create the database** (if using MySQL)
+1. **Create the database** 
 
 ```bash
-mysql -u root -p
+mysql -u root
 CREATE DATABASE helpdesk_ticket_api;
 exit;
 ```
 
-For SQLite, create an empty database file:
-```bash
-type nul > database\database.sqlite
-```
-
 2. **Run migrations**
+
+```bash
+Php artisan make:migration
+```
 
 ```bash
 php artisan migrate
@@ -169,18 +96,21 @@ Run the test suite using Pest:
 php artisan test
 ```
 
-Or with more verbose output:
-
-```bash
-php artisan test --parallel
-```
-
 ## API Documentation
 
 ### Generate Documentation
 
 Generate API documentation using Scribe:
 
+Install Scribe:
+```bash
+composer require --dev knuckleswtf/scribe
+```
+Copy the config file:
+```bash
+php artisan vendor:publish --tag=scribe-config
+```
+Generate documentation:
 ```bash
 php artisan scribe:generate
 ```
@@ -208,20 +138,21 @@ Scribe automatically generates an OpenAPI specification at:
 public/docs/openapi.yaml
 ```
 
-## Test Users
+### Test User Credentials & Seeder credentials
 
-The database seeder creates the following test users (all passwords are `password`):
+- **Admin**:
+- Email: admin@example.com
 
-| Role     | Email                  | Password | Abilities                                    |
-|----------|------------------------|----------|----------------------------------------------|
-| Admin    | admin@example.com      | password | All abilities (full access)                  |
-| Agent    | agent1@example.com     | password | View/update tickets, manage comments         |
-| Agent    | agent2@example.com     | password | View/update tickets, manage comments         |
-| Customer | customer1@example.com  | password | Create/view own tickets, create comments     |
-| Customer | customer2@example.com  | password | Create/view own tickets, create comments     |
-| Customer | customer3@example.com  | password | Create/view own tickets, create comments     |
-| Customer | customer4@example.com  | password | Create/view own tickets, create comments     |
-| Customer | customer5@example.com  | password | Create/view own tickets, create comments     |
+- **agent**:
+- Email: agent1@example.com
+- Email: agent2@example.com
+
+- **customer**:
+- Email: customer1@example.com
+- Email: customer2@example.com
+- Email: customer3@example.com
+
+- **password For All**: password
 
 ## Token Abilities
 
@@ -299,35 +230,6 @@ This approach allows:
 - Gradual migration path for clients
 - Clear deprecation timeline for old versions
 
-## Rate Limiting
-
-The API implements rate limiting to prevent abuse:
-
-### Auth Endpoints
-- **Limit**: 5 requests per minute per IP
-- **Applies to**: `POST /api/v1/auth/token`
-
-### API Endpoints
-- **Limit**: 60 requests per minute per user (or IP for unauthenticated)
-- **Applies to**: All authenticated endpoints
-
-### Rate Limit Headers
-
-Responses include rate limit headers:
-```
-X-RateLimit-Limit: 60
-X-RateLimit-Remaining: 59
-Retry-After: 60 (when limit exceeded)
-```
-
-### Rate Limit Exceeded Response
-
-```json
-{
-  "message": "Too Many Attempts.",
-  "exception": "Illuminate\\Http\\Exceptions\\ThrottleRequestsException"
-}
-```
 
 ## Postman Testing
 
@@ -336,8 +238,9 @@ A Postman collection is included in the repository: `postman_collection.json`
 ### Import Collection
 
 1. Open Postman
-2. Click **Import**
-3. Select `postman_collection.json`
+2. Click the "Import" button
+3. Select the `postman_collection.json` file
+4. Click "Import"
 
 ### Setup Environment
 
@@ -425,33 +328,23 @@ Controllers automatically scope queries:
 - Customers cannot use `filter[customer_id]` to view other users' tickets
 - Comment listings filter out internal comments for customers
 
-### Implementation Example
 
-```php
-// In UpdateTicketRequest
-protected function prepareForValidation(): void
-{
-    if ($this->user()->isCustomer()) {
-        $this->request->remove('status');
-        $this->request->remove('priority');
-        $this->request->remove('assigned_to');
-    }
-}
+###  where to access generated docs
+    - public/docs/
 
-// In TicketController
-if ($user->isCustomer()) {
-    $query->where('user_id', $user->id);
-}
 
-// In TicketPolicy
-public function delete(User $user, Ticket $ticket): bool
-{
-    if ($user->isCustomer() && $ticket->user_id === $user->id && $ticket->status === 'open') {
-        return true;
-    }
-    return false;
-}
-```
+## Rate Limiting
+### the limits Rate Limiting
+- 10 requests per minute for all users
+
+
+
+
+
+
+
+
+
 
 ## API Endpoints
 
@@ -564,7 +457,3 @@ GET /api/v1/tickets?page=2&per_page=20
   }
 }
 ```
-
-## License
-
-This project is open-sourced software licensed under the MIT license.

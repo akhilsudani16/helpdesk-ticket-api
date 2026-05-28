@@ -27,25 +27,19 @@ class Ticket extends Model
         ];
     }
 
-    /**
-     * Get the customer (user) who created this ticket.
-     */
+
     public function customer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    /**
-     * Get the agent assigned to this ticket.
-     */
+
     public function assignedAgent(): BelongsTo
     {
         return $this->belongsTo(User::class, 'assigned_to');
     }
 
-    /**
-     * Get all comments for this ticket.
-     */
+
     public function comments(): HasMany
     {
         return $this->hasMany(TicketComment::class);

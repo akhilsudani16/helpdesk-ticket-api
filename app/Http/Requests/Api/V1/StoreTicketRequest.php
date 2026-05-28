@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Api\V1;
 
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreTicketRequest extends FormRequest
@@ -17,7 +18,7 @@ class StoreTicketRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array|string>
      */
     public function rules(): array
     {
@@ -36,12 +37,11 @@ class StoreTicketRequest extends FormRequest
     {
         $validated = parent::validated($key, $default);
         $user = $this->user();
-        
-        // Remove user_id for non-admin users
+
         if ($user && !$user->isAdmin()) {
             unset($validated['user_id']);
         }
-        
+
         return $validated;
     }
 
@@ -51,8 +51,7 @@ class StoreTicketRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $user = $this->user();
-        
-        // Remove user_id field for non-admin users
+
         if ($user && !$user->isAdmin()) {
             $input = $this->all();
             unset($input['user_id']);

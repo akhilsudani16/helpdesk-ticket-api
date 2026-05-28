@@ -13,7 +13,6 @@ class TicketCommentPolicy
      */
     public function viewAny(User $user, Ticket $ticket): bool
     {
-        // User must be able to view the ticket to view its comments
         return $user->tokenCan('comments:view') && $user->can('view', $ticket);
     }
 
@@ -26,7 +25,6 @@ class TicketCommentPolicy
             return false;
         }
 
-        // Admin and agents can see all comments
         if ($user->isAdmin() || $user->isAgent()) {
             return true;
         }
@@ -40,7 +38,6 @@ class TicketCommentPolicy
      */
     public function create(User $user, Ticket $ticket): bool
     {
-        // User must be able to view the ticket to comment on it
         return $user->tokenCan('comments:create') && $user->can('view', $ticket);
     }
 
@@ -49,7 +46,7 @@ class TicketCommentPolicy
      */
     public function createInternal(User $user): bool
     {
-        return $user->tokenCan('comments:create-internal') && 
+        return $user->tokenCan('comments:create-internal') &&
                ($user->isAdmin() || $user->isAgent());
     }
 }

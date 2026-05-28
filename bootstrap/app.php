@@ -1,8 +1,13 @@
 <?php
 
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -16,10 +21,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->throttleApi();
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->render(function (Throwable $e, \Illuminate\Http\Request $request) {
+        $exceptions->render(function (Throwable $e, Request $request) {
             if ($request->is('api/*')) {
                 // Handle validation exceptions
-                if ($e instanceof \Illuminate\Validation\ValidationException) {
+                if ($e instanceof ValidationException) {
                     return response()->json([
                         'status' => 'error',
                         'message' => 'Validation failed.',
@@ -28,7 +33,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 }
 
                 // Handle model not found exceptions
-                if ($e instanceof \Illuminate\Database\Eloquent\ModelNotFoundException) {
+                if ($e instanceof ModelNotFoundException) {
                     return response()->json([
                         'status' => 'error',
                         'message' => 'Resource not found.',
@@ -36,7 +41,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 }
 
                 // Handle authorization exceptions
-                if ($e instanceof \Illuminate\Auth\AuthorizationException) {
+                if ($e instanceof AuthorizationException) {
                     return response()->json([
                         'status' => 'error',
                         'message' => 'This action is forbidden.',
@@ -44,7 +49,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 }
 
                 // Handle authentication exceptions
-                if ($e instanceof \Illuminate\Auth\AuthenticationException) {
+                if ($e instanceof AuthenticationException) {
                     return response()->json([
                         'status' => 'error',
                         'message' => 'Unauthenticated.',

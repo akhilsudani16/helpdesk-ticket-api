@@ -24,22 +24,20 @@ class TicketResource extends JsonResource
             'updated_at' => $this->updated_at?->toISOString(),
         ];
 
-        // Always include customer summary if loaded
         if ($this->relationLoaded('customer')) {
             $data['customer'] = $this->shouldInclude('customer')
-                ? new UserResource($this->customer)  // Full details when explicitly included
-                : [  // Summary by default
+                ? new UserResource($this->customer)
+                : [
                     'id' => $this->customer->id,
                     'name' => $this->customer->name,
                     'email' => $this->customer->email,
                 ];
         }
 
-        // Always include assigned agent summary if assigned and loaded
         if ($this->assigned_to && $this->relationLoaded('assignedAgent')) {
             $data['assigned_agent'] = $this->shouldInclude('assignedAgent')
-                ? new UserResource($this->assignedAgent)  // Full details when explicitly included
-                : [  // Summary by default
+                ? new UserResource($this->assignedAgent)
+                : [
                     'id' => $this->assignedAgent->id,
                     'name' => $this->assignedAgent->name,
                     'email' => $this->assignedAgent->email,
@@ -48,7 +46,6 @@ class TicketResource extends JsonResource
             $data['assigned_agent'] = null;
         }
 
-        // Include comments when requested
         if ($this->shouldInclude('comments') && $this->relationLoaded('comments')) {
             $data['comments'] = TicketCommentResource::collection($this->comments);
         }
@@ -63,7 +60,7 @@ class TicketResource extends JsonResource
     {
         $includes = request()->query('include', '');
         $includesArray = array_filter(explode(',', $includes));
-        
+
         return in_array($relationship, $includesArray);
     }
 }

@@ -22,10 +22,6 @@ return new class extends Migration
             $table->softDeletes();
             $table->timestamps();
 
-            $table->index('user_id');
-            $table->index('assigned_to');
-            $table->index('status');
-            $table->index('priority');
         });
     }
 

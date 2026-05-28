@@ -1,0 +1,48 @@
+name: 'Health Check'
+description: |-
+
+  API health check endpoint
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/v1/health
+    metadata:
+      custom: []
+      groupName: 'Health Check'
+      groupDescription: |-
+
+        API health check endpoint
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Health check'
+      description: 'Check if the API is running.'
+      authenticated: false
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: |-
+          {
+            "status": "ok",
+            "version": "v1"
+          }
+        headers: []
+        description: ''
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null

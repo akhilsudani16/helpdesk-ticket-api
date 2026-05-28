@@ -1,0 +1,605 @@
+name: Tickets
+description: |-
+
+  APIs for managing support tickets
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/v1/tickets
+    metadata:
+      custom: []
+      groupName: Tickets
+      groupDescription: |-
+
+        APIs for managing support tickets
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'List tickets'
+      description: 'Get a paginated list of tickets with optional filtering and sorting.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters:
+      include:
+        custom: []
+        name: include
+        description: 'Comma-separated list of relationships to include (customer,assignedAgent,comments).'
+        required: false
+        example: 'customer,comments'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      'filter[status]':
+        custom: []
+        name: 'filter[status]'
+        description: 'Filter by status.'
+        required: false
+        example: open
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      'filter[priority]':
+        custom: []
+        name: 'filter[priority]'
+        description: 'Filter by priority.'
+        required: false
+        example: high
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      'filter[customer_id]':
+        custom: []
+        name: 'filter[customer_id]'
+        description: 'Filter by customer ID.'
+        required: false
+        example: 5
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      'filter[assigned_to]':
+        custom: []
+        name: 'filter[assigned_to]'
+        description: 'Filter by assigned agent ID.'
+        required: false
+        example: 2
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      'filter[created_after]':
+        custom: []
+        name: 'filter[created_after]'
+        description: 'Filter by creation date.'
+        required: false
+        example: '2026-01-01'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      sort:
+        custom: []
+        name: sort
+        description: 'Sort by field(s). Prefix with - for descending.'
+        required: false
+        example: '-created_at'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      page:
+        custom: []
+        name: page
+        description: 'Page number.'
+        required: false
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      per_page:
+        custom: []
+        name: per_page
+        description: 'Items per page.'
+        required: false
+        example: 15
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanQueryParameters:
+      include: 'customer,comments'
+      'filter[status]': open
+      'filter[priority]': high
+      'filter[customer_id]': 5
+      'filter[assigned_to]': 2
+      'filter[created_after]': '2026-01-01'
+      sort: '-created_at'
+      page: 1
+      per_page: 15
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"status":"error","message":"Unauthenticated."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/v1/tickets
+    metadata:
+      custom: []
+      groupName: Tickets
+      groupDescription: |-
+
+        APIs for managing support tickets
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Create ticket'
+      description: 'Create a new support ticket.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      title:
+        custom: []
+        name: title
+        description: 'Ticket title (5-120 characters).'
+        required: true
+        example: 'Payment failed'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      description:
+        custom: []
+        name: description
+        description: 'Ticket description (min 20 characters).'
+        required: true
+        example: 'I paid for the plan, but my account is not upgraded.'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      priority:
+        custom: []
+        name: priority
+        description: 'Priority level.'
+        required: true
+        example: high
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      user_id:
+        custom: []
+        name: user_id
+        description: 'User ID (admin only).'
+        required: false
+        example: 5
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      title: 'Payment failed'
+      description: 'I paid for the plan, but my account is not upgraded.'
+      priority: high
+      user_id: 5
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/v1/tickets/{id}'
+    metadata:
+      custom: []
+      groupName: Tickets
+      groupDescription: |-
+
+        APIs for managing support tickets
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Show ticket'
+      description: 'Get details of a specific ticket.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The ID of the ticket.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      ticket:
+        custom: []
+        name: ticket
+        description: 'The ticket ID.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: 1
+      ticket: 1
+    queryParameters:
+      include:
+        custom: []
+        name: include
+        description: 'Comma-separated list of relationships to include.'
+        required: false
+        example: 'customer,comments'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanQueryParameters:
+      include: 'customer,comments'
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"status":"error","message":"Unauthenticated."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PUT
+    uri: 'api/v1/tickets/{id}'
+    metadata:
+      custom: []
+      groupName: Tickets
+      groupDescription: |-
+
+        APIs for managing support tickets
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Replace ticket (PUT)'
+      description: 'Fully replace a ticket. All fields are required.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The ID of the ticket.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      ticket:
+        custom: []
+        name: ticket
+        description: 'The ticket ID.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: 1
+      ticket: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      title:
+        custom: []
+        name: title
+        description: 'Ticket title (5-120 characters).'
+        required: true
+        example: 'Payment failed'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      description:
+        custom: []
+        name: description
+        description: 'Ticket description (min 20 characters).'
+        required: true
+        example: 'Full description'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      status:
+        custom: []
+        name: status
+        description: Status.
+        required: true
+        example: open
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      priority:
+        custom: []
+        name: priority
+        description: 'Priority level.'
+        required: true
+        example: high
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      assigned_to:
+        custom: []
+        name: assigned_to
+        description: 'Assigned agent ID.'
+        required: false
+        example: 2
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      title: 'Payment failed'
+      description: 'Full description'
+      status: open
+      priority: high
+      assigned_to: 2
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PATCH
+    uri: 'api/v1/tickets/{ticket_id}'
+    metadata:
+      custom: []
+      groupName: Tickets
+      groupDescription: |-
+
+        APIs for managing support tickets
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Update ticket (PATCH)'
+      description: 'Partially update a ticket. Only provided fields will be updated.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      ticket_id:
+        custom: []
+        name: ticket_id
+        description: 'The ID of the ticket.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      ticket:
+        custom: []
+        name: ticket
+        description: 'The ticket ID.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      ticket_id: 1
+      ticket: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      title:
+        custom: []
+        name: title
+        description: 'Ticket title (5-120 characters).'
+        required: false
+        example: 'Payment issue resolved'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      description:
+        custom: []
+        name: description
+        description: 'Ticket description (min 20 characters).'
+        required: false
+        example: 'Updated description'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      status:
+        custom: []
+        name: status
+        description: 'Status (admin/agent only).'
+        required: false
+        example: in_progress
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      priority:
+        custom: []
+        name: priority
+        description: 'Priority (admin/agent only).'
+        required: false
+        example: medium
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      assigned_to:
+        custom: []
+        name: assigned_to
+        description: 'Assigned agent ID (admin/agent only).'
+        required: false
+        example: 2
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      title: 'Payment issue resolved'
+      description: 'Updated description'
+      status: in_progress
+      priority: medium
+      assigned_to: 2
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - DELETE
+    uri: 'api/v1/tickets/{id}'
+    metadata:
+      custom: []
+      groupName: Tickets
+      groupDescription: |-
+
+        APIs for managing support tickets
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Delete ticket'
+      description: 'Delete a ticket. Customers can only delete their own open tickets.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The ID of the ticket.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      ticket:
+        custom: []
+        name: ticket
+        description: 'The ticket ID.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: 1
+      ticket: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null

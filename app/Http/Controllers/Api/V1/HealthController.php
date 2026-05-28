@@ -7,16 +7,16 @@ use App\Support\ApiResponse;
 
 /**
  * @group Health Check
- * 
+ *
  * API health check endpoint
  */
 class HealthController extends Controller
 {
     /**
      * Health check
-     * 
+     *
      * Check if the API is running.
-     * 
+     *
      * @response 200 {
      *   "status": "ok",
      *   "version": "v1"
@@ -24,9 +24,15 @@ class HealthController extends Controller
      */
     public function check()
     {
-        return response()->json([
+        return ApiResponse::success([
             'status' => 'ok',
-            'version' => 'v1',
-        ]);
+            'version' => 'v1'
+        ], 'API is running');
+
+
+//        return response()->json([
+//            'status' => 'ok',
+//            'version' => 'v1',
+//        ]);
     }
 }

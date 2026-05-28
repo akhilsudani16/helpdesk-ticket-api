@@ -23,7 +23,6 @@ class UserPolicy
             return false;
         }
 
-        // Admin and agents can view users
         return $user->isAdmin() || $user->isAgent();
     }
 

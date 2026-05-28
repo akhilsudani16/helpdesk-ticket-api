@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Api\V1;
 
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreTicketCommentRequest extends FormRequest
@@ -17,7 +18,7 @@ class StoreTicketCommentRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array|string>
      */
     public function rules(): array
     {
@@ -34,12 +35,11 @@ class StoreTicketCommentRequest extends FormRequest
     {
         $validated = parent::validated($key, $default);
         $user = $this->user();
-        
-        // Remove is_internal for customers
+
         if ($user && $user->isCustomer()) {
             unset($validated['is_internal']);
         }
-        
+
         return $validated;
     }
 
@@ -49,8 +49,7 @@ class StoreTicketCommentRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $user = $this->user();
-        
-        // Remove is_internal field for customers
+
         if ($user && $user->isCustomer()) {
             $input = $this->all();
             unset($input['is_internal']);

@@ -12,19 +12,19 @@ use Illuminate\Http\Request;
 
 /**
  * @group Ticket Comments
- * 
+ *
  * APIs for managing ticket comments
  */
 class TicketCommentController extends Controller
 {
     /**
      * List ticket comments
-     * 
+     *
      * Get all comments for a specific ticket.
      * Customers can only see public comments.
-     * 
+     *
      * @authenticated
-     * 
+     *
      * @urlParam ticket integer required The ticket ID. Example: 1
      */
     public function index(Request $request, Ticket $ticket)
@@ -32,7 +32,7 @@ class TicketCommentController extends Controller
         $this->authorize('viewAny', [TicketComment::class, $ticket]);
 
         $user = $request->user();
-        
+
         $query = $ticket->comments()->with('user');
 
         // Customers can only see public comments
@@ -49,12 +49,12 @@ class TicketCommentController extends Controller
 
     /**
      * Create ticket comment
-     * 
+     *
      * Add a new comment to a ticket.
      * Customers can only create public comments.
-     * 
+     *
      * @authenticated
-     * 
+     *
      * @urlParam ticket integer required The ticket ID. Example: 1
      * @bodyParam body string required Comment text (3-2000 characters). Example: This issue has been resolved.
      * @bodyParam is_internal boolean Whether the comment is internal (admin/agent only). Example: false
