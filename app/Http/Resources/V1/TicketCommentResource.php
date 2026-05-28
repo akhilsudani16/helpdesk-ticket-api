@@ -15,7 +15,7 @@ class TicketCommentResource extends JsonResource
     public function toArray(Request $request): array
     {
         $user = $request->user();
-
+        
         return [
             'id' => $this->id,
             'body' => $this->body,

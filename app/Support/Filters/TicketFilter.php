@@ -55,11 +55,11 @@ class TicketFilter
     protected function status(string $value): void
     {
         $allowedStatuses = ['open', 'in_progress', 'resolved', 'closed'];
-
+        
         if (!in_array($value, $allowedStatuses)) {
             abort(400, "Invalid status value: {$value}. Allowed values: " . implode(', ', $allowedStatuses));
         }
-
+        
         $this->query->where('status', $value);
     }
 
@@ -69,11 +69,11 @@ class TicketFilter
     protected function priority(string $value): void
     {
         $allowedPriorities = ['low', 'medium', 'high', 'urgent'];
-
+        
         if (!in_array($value, $allowedPriorities)) {
             abort(400, "Invalid priority value: {$value}. Allowed values: " . implode(', ', $allowedPriorities));
         }
-
+        
         $this->query->where('priority', $value);
     }
 
@@ -86,7 +86,7 @@ class TicketFilter
         if (!is_numeric($value) || $value < 1) {
             abort(400, "Invalid customer_id: must be a positive integer.");
         }
-
+        
         $this->query->where('user_id', $value);
     }
 
@@ -98,7 +98,7 @@ class TicketFilter
         if (!is_numeric($value) || $value < 1) {
             abort(400, "Invalid assigned_to: must be a positive integer.");
         }
-
+        
         $this->query->where('assigned_to', $value);
     }
 
@@ -109,11 +109,11 @@ class TicketFilter
     {
         // Validate date format
         $date = \DateTime::createFromFormat('Y-m-d', $value);
-
+        
         if (!$date || $date->format('Y-m-d') !== $value) {
             abort(400, "Invalid date format for created_after. Expected format: YYYY-MM-DD (e.g., 2026-01-01)");
         }
-
+        
         $this->query->where('created_at', '>=', $value . ' 00:00:00');
     }
 

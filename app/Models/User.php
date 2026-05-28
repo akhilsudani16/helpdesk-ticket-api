@@ -58,7 +58,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if the user is an admin.
+     * Check if user is an admin.
      */
     public function isAdmin(): bool
     {
@@ -66,7 +66,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if the user is an agent.
+     * Check if user is an agent.
      */
     public function isAgent(): bool
     {
@@ -74,7 +74,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if the user is a customer.
+     * Check if user is a customer.
      */
     public function isCustomer(): bool
     {

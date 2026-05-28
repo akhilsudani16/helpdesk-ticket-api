@@ -1,8 +1,10 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::get('login', function () {
-    return response()->json(['message' => 'Login successful']);
-});
+
+// API Version 1 Routes
+Route::prefix('v1')->group(base_path('routes/api_v1.php'));
+
+// Future API versions can be added here
+// Route::prefix('v2')->group(base_path('routes/api_v2.php'));

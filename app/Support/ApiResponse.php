@@ -7,7 +7,7 @@ use Illuminate\Http\JsonResponse;
 class ApiResponse
 {
     /**
-     * Return a successful JSON response.
+     * Return a success JSON response.
      */
     public static function success(
         mixed $data = null,
@@ -57,7 +57,7 @@ class ApiResponse
     }
 
     /**
-     * Return an unauthorised response.
+     * Return an unauthorized response.
      */
     public static function unauthorized(
         string $message = 'Unauthorized.'

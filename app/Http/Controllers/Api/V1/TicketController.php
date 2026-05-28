@@ -12,25 +12,47 @@ use App\Models\Ticket;
 use App\Support\ApiResponse;
 use App\Support\Filters\TicketFilter;
 use Illuminate\Http\Request;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
-
+/**
+ * @group Tickets
+ * 
+ * APIs for managing support tickets
+ */
 class TicketController extends Controller
 {
-    use AuthorizesRequests;
+    /**
+     * List tickets
+     * 
+     * Get a paginated list of tickets with optional filtering and sorting.
+     * 
+     * @authenticated
+     * 
+     * @queryParam include string Comma-separated list of relationships to include (customer,assignedAgent,comments). Example: customer,comments
+     * @queryParam filter[status] string Filter by status. Example: open
+     * @queryParam filter[priority] string Filter by priority. Example: high
+     * @queryParam filter[customer_id] integer Filter by customer ID. Example: 5
+     * @queryParam filter[assigned_to] integer Filter by assigned agent ID. Example: 2
+     * @queryParam filter[created_after] string Filter by creation date. Example: 2026-01-01
+     * @queryParam sort string Sort by field(s). Prefix with - for descending. Example: -created_at
+     * @queryParam page integer Page number. Example: 1
+     * @queryParam per_page integer Items per page. Example: 15
+     */
     public function index(Request $request)
     {
         $this->authorize('viewAny', Ticket::class);
 
         $user = $request->user();
-
+        
         // Start query
         $query = Ticket::query();
+
+        // Always load customer and assignedAgent for summaries
+        $query->with(['customer', 'assignedAgent']);
 
         // Customers can only see their own tickets
         if ($user->isCustomer()) {
             $query->where('user_id', $user->id);
-
+            
             // Prevent customers from filtering by other customer IDs
             if ($request->has('filter.customer_id') && $request->input('filter.customer_id') != $user->id) {
                 return ApiResponse::forbidden('You cannot view other customers\' tickets.');
@@ -44,7 +66,7 @@ class TicketController extends Controller
         // Apply sorting
         $this->applySorting($query, $request);
 
-        // Load relationships based on include parameter
+        // Load additional relationships based on include parameter
         $this->loadIncludes($query, $request);
 
         // Paginate results
@@ -54,6 +76,18 @@ class TicketController extends Controller
         return new TicketCollection($tickets);
     }
 
+    /**
+     * Create ticket
+     * 
+     * Create a new support ticket.
+     * 
+     * @authenticated
+     * 
+     * @bodyParam title string required Ticket title (5-120 characters). Example: Payment failed
+     * @bodyParam description string required Ticket description (min 20 characters). Example: I paid for the plan, but my account is not upgraded.
+     * @bodyParam priority string required Priority level. Example: high
+     * @bodyParam user_id integer User ID (admin only). Example: 5
+     */
     public function store(StoreTicketRequest $request)
     {
         $this->authorize('create', Ticket::class);
@@ -74,6 +108,9 @@ class TicketController extends Controller
 
         $ticket = Ticket::create($data);
 
+        // Load customer and assignedAgent for response
+        $ticket->load(['customer', 'assignedAgent']);
+
         return ApiResponse::success(
             new TicketResource($ticket),
             'Ticket created successfully.',
@@ -81,22 +118,51 @@ class TicketController extends Controller
         );
     }
 
+    /**
+     * Show ticket
+     * 
+     * Get details of a specific ticket.
+     * 
+     * @authenticated
+     * 
+     * @urlParam ticket integer required The ticket ID. Example: 1
+     * @queryParam include string Comma-separated list of relationships to include. Example: customer,comments
+     */
     public function show(Request $request, Ticket $ticket)
     {
         $this->authorize('view', $ticket);
 
-        // Load relationships based on include parameter
+        // Always load customer and assignedAgent for summaries
+        $ticket->load(['customer', 'assignedAgent']);
+
+        // Load additional relationships based on include parameter
         $this->loadIncludesForModel($ticket, $request);
 
         return ApiResponse::success(new TicketResource($ticket));
     }
 
-
+    /**
+     * Update ticket (PATCH)
+     * 
+     * Partially update a ticket. Only provided fields will be updated.
+     * 
+     * @authenticated
+     * 
+     * @urlParam ticket integer required The ticket ID. Example: 1
+     * @bodyParam title string Ticket title (5-120 characters). Example: Payment issue resolved
+     * @bodyParam description string Ticket description (min 20 characters). Example: Updated description
+     * @bodyParam status string Status (admin/agent only). Example: in_progress
+     * @bodyParam priority string Priority (admin/agent only). Example: medium
+     * @bodyParam assigned_to integer Assigned agent ID (admin/agent only). Example: 2
+     */
     public function patch(UpdateTicketRequest $request, Ticket $ticket)
     {
         $this->authorize('update', $ticket);
 
         $ticket->update($request->validated());
+
+        // Load customer and assignedAgent for response
+        $ticket->load(['customer', 'assignedAgent']);
 
         return ApiResponse::success(
             new TicketResource($ticket->fresh()),
@@ -104,17 +170,35 @@ class TicketController extends Controller
         );
     }
 
+    /**
+     * Replace ticket (PUT)
+     * 
+     * Fully replace a ticket. All fields are required.
+     * 
+     * @authenticated
+     * 
+     * @urlParam ticket integer required The ticket ID. Example: 1
+     * @bodyParam title string required Ticket title (5-120 characters). Example: Payment failed
+     * @bodyParam description string required Ticket description (min 20 characters). Example: Full description
+     * @bodyParam status string required Status. Example: open
+     * @bodyParam priority string required Priority level. Example: high
+     * @bodyParam assigned_to integer Assigned agent ID. Example: 2
+     */
     public function update(ReplaceTicketRequest $request, Ticket $ticket)
     {
         $this->authorize('update', $ticket);
 
         $user = $request->user();
-
+        
+        // Customers cannot use PUT to update tickets
         if ($user->isCustomer()) {
             return ApiResponse::forbidden('Customers must use PATCH for partial updates.');
         }
 
         $ticket->update($request->validated());
+
+        // Load customer and assignedAgent for response
+        $ticket->load(['customer', 'assignedAgent']);
 
         return ApiResponse::success(
             new TicketResource($ticket->fresh()),
@@ -122,6 +206,15 @@ class TicketController extends Controller
         );
     }
 
+    /**
+     * Delete ticket
+     * 
+     * Delete a ticket. Customers can only delete their own open tickets.
+     * 
+     * @authenticated
+     * 
+     * @urlParam ticket integer required The ticket ID. Example: 1
+     */
     public function destroy(Ticket $ticket)
     {
         $this->authorize('delete', $ticket);
@@ -137,7 +230,7 @@ class TicketController extends Controller
     private function applySorting($query, Request $request): void
     {
         $sortParam = $request->query('sort');
-
+        
         if (!$sortParam) {
             return;
         }
@@ -169,13 +262,17 @@ class TicketController extends Controller
     {
         $includes = $request->query('include', '');
         $includesArray = array_filter(explode(',', $includes));
-
+        
         $allowedIncludes = ['customer', 'assignedAgent', 'comments'];
         $validIncludes = [];
 
         foreach ($includesArray as $include) {
             if (in_array($include, $allowedIncludes)) {
-                $validIncludes[] = $include;
+                // Only load comments as additional include
+                // customer and assignedAgent are already loaded for summaries
+                if ($include === 'comments') {
+                    $validIncludes[] = $include;
+                }
             }
         }
 
@@ -191,12 +288,16 @@ class TicketController extends Controller
     {
         $includes = $request->query('include', '');
         $includesArray = array_filter(explode(',', $includes));
-
+        
         $allowedIncludes = ['customer', 'assignedAgent', 'comments'];
 
         foreach ($includesArray as $include) {
             if (in_array($include, $allowedIncludes)) {
-                $model->load($include);
+                // Only load comments as additional include
+                // customer and assignedAgent are already loaded for summaries
+                if ($include === 'comments') {
+                    $model->load($include);
+                }
             }
         }
     }

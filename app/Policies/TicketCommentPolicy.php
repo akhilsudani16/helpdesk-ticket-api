@@ -49,7 +49,7 @@ class TicketCommentPolicy
      */
     public function createInternal(User $user): bool
     {
-        return $user->tokenCan('comments:create-internal') &&
-            ($user->isAdmin() || $user->isAgent());
+        return $user->tokenCan('comments:create-internal') && 
+               ($user->isAdmin() || $user->isAgent());
     }
 }

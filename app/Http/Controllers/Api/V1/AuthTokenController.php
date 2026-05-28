@@ -9,8 +9,31 @@ use App\Support\ApiResponse;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
+/**
+ * @group Authentication
+ * 
+ * APIs for managing authentication tokens
+ */
 class AuthTokenController extends Controller
 {
+    /**
+     * Create authentication token
+     * 
+     * Generate a new API token for the user.
+     * 
+     * @bodyParam email string required The user's email address. Example: admin@example.com
+     * @bodyParam password string required The user's password. Example: password
+     * @bodyParam device_name string required The device name for the token. Example: Postman
+     * 
+     * @response 200 {
+     *   "status": "success",
+     *   "message": "Token created successfully.",
+     *   "data": {
+     *     "token": "1|abc123...",
+     *     "abilities": ["tickets:view", "tickets:create"]
+     *   }
+     * }
+     */
     public function store(StoreAuthTokenRequest $request)
     {
         $user = User::where('email', $request->email)->first();
@@ -21,7 +44,7 @@ class AuthTokenController extends Controller
             ]);
         }
 
-        // abilities for user role
+        // Define abilities based on user role
         $abilities = $this->getAbilitiesForRole($user->role);
 
         // Create token with abilities
@@ -33,7 +56,18 @@ class AuthTokenController extends Controller
         ], 'Token created successfully.');
     }
 
-
+    /**
+     * Revoke authentication token
+     * 
+     * Delete the current user's API token.
+     * 
+     * @authenticated
+     * 
+     * @response 200 {
+     *   "status": "success",
+     *   "message": "Token revoked successfully."
+     * }
+     */
     public function destroy()
     {
         auth()->user()->currentAccessToken()->delete();

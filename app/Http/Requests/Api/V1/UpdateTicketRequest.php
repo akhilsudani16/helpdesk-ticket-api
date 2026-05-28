@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Api\V1;
 
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateTicketRequest extends FormRequest
@@ -18,12 +17,12 @@ class UpdateTicketRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, ValidationRule|array|string>
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         $user = $this->user();
-
+        
         $rules = [
             'title' => ['sometimes', 'string', 'min:5', 'max:120'],
             'description' => ['sometimes', 'string', 'min:20'],
@@ -46,12 +45,12 @@ class UpdateTicketRequest extends FormRequest
     {
         $validated = parent::validated($key, $default);
         $user = $this->user();
-
+        
         // Remove forbidden fields for customers
         if ($user && $user->isCustomer()) {
             unset($validated['status'], $validated['priority'], $validated['assigned_to']);
         }
-
+        
         return $validated;
     }
 
@@ -62,14 +61,14 @@ class UpdateTicketRequest extends FormRequest
     {
         // Remove forbidden fields before validation for customers
         $user = $this->user();
-
+        
         if ($user && $user->isCustomer()) {
             // Get all input
             $input = $this->all();
-
+            
             // Remove forbidden fields
             unset($input['status'], $input['priority'], $input['assigned_to']);
-
+            
             // Replace the input
             $this->replace($input);
         }

@@ -1,102 +1,570 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Helpdesk Ticket API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A production-style REST API built with Laravel for managing support tickets. This API demonstrates best practices including JSON API response design, API versioning, token authentication, authorization policies, filtering, sorting, and comprehensive documentation.
 
-## About Laravel
+## Table of Contents
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Project Setup](#project-setup)
+- [Environment Variables](#environment-variables)
+- [Database Setup](#database-setup)
+- [Running the API](#running-the-api)
+- [Running Tests](#running-tests)
+- [API Documentation](#api-documentation)
+- [Test Users](#test-users)
+- [Token Abilities](#token-abilities)
+- [API Versioning](#api-versioning)
+- [Rate Limiting](#rate-limiting)
+- [Postman Testing](#postman-testing)
+- [Principle of Least Privilege](#principle-of-least-privilege)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Features
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- ✅ JSON API response design with consistent format
+- ✅ API versioning (`/api/v1`)
+- ✅ Laravel Sanctum token authentication
+- ✅ Token revocation and expiration awareness
+- ✅ API Resources and Resource Collections
+- ✅ Conditional includes for relationships
+- ✅ Query filters and sorting
+- ✅ Nested resources (ticket comments)
+- ✅ POST, PUT, PATCH, DELETE handling
+- ✅ Policies and token abilities
+- ✅ Granular permission rules
+- ✅ Consistent JSON error responses
+- ✅ API documentation using Scribe
+- ✅ Rate limiting
+- ✅ Health check endpoint
+- ✅ Soft deletes for tickets
 
-## Learning Laravel
+## Tech Stack
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- **Laravel**: 13.x
+- **PHP**: 8.3+
+- **Database**: MySQL or SQLite
+- **Authentication**: Laravel Sanctum
+- **Testing**: Pest
+- **Documentation**: Scribe
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Project Setup
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+1. **Clone the repository** (or extract the ZIP file)
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+cd helpdesk-api
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+2. **Install PHP dependencies**
 
-## Contributing
+```bash
+composer install
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+3. **Install Node dependencies** (optional, for asset compilation)
 
-## Code of Conduct
+```bash
+npm install
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+4. **Copy environment file**
 
-## Security Vulnerabilities
+```bash
+copy .env.example .env
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+5. **Generate application key**
+
+```bash
+php artisan key:generate
+```
+
+## Environment Variables
+
+Update your `.env` file with the following required variables:
+
+```env
+APP_NAME="Helpdesk Ticket API"
+APP_ENV=local
+APP_KEY=base64:... # Generated by php artisan key:generate
+APP_DEBUG=true
+APP_URL=http://localhost:8000
+
+# Database Configuration
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=helpdesk_ticket_api
+DB_USERNAME=root
+DB_PASSWORD=
+
+# For SQLite (alternative)
+# DB_CONNECTION=sqlite
+# DB_DATABASE=C:\path\to\database\database.sqlite
+
+# Sanctum Configuration
+SANCTUM_STATEFUL_DOMAINS=localhost,localhost:8000,127.0.0.1,127.0.0.1:8000
+```
+
+### Token Expiration
+
+Laravel Sanctum tokens do not expire by default. To configure token expiration, you can:
+
+1. Set expiration in `config/sanctum.php`:
+```php
+'expiration' => 60, // minutes
+```
+
+2. Or manually expire tokens using the `expires_at` column in the `personal_access_tokens` table.
+
+## Database Setup
+
+1. **Create the database** (if using MySQL)
+
+```bash
+mysql -u root -p
+CREATE DATABASE helpdesk_ticket_api;
+exit;
+```
+
+For SQLite, create an empty database file:
+```bash
+type nul > database\database.sqlite
+```
+
+2. **Run migrations**
+
+```bash
+php artisan migrate
+```
+
+3. **Seed the database**
+
+```bash
+php artisan db:seed
+```
+
+This will create:
+- 1 admin user
+- 2 agent users
+- 5 customer users
+- 30 tickets
+- At least 2 comments per ticket
+
+## Running the API
+
+Start the development server:
+
+```bash
+php artisan serve
+```
+
+The API will be available at `http://localhost:8000/api/v1`
+
+## Running Tests
+
+Run the test suite using Pest:
+
+```bash
+php artisan test
+```
+
+Or with more verbose output:
+
+```bash
+php artisan test --parallel
+```
+
+## API Documentation
+
+### Generate Documentation
+
+Generate API documentation using Scribe:
+
+```bash
+php artisan scribe:generate
+```
+
+### Access Documentation
+
+After generation, access the documentation at:
+
+```
+http://localhost:8000/docs
+```
+
+The documentation includes:
+- All API endpoints
+- Authentication instructions
+- Request examples
+- Sample responses
+- Error responses
+
+### OpenAPI Export
+
+Scribe automatically generates an OpenAPI specification at:
+
+```
+public/docs/openapi.yaml
+```
+
+## Test Users
+
+The database seeder creates the following test users (all passwords are `password`):
+
+| Role     | Email                  | Password | Abilities                                    |
+|----------|------------------------|----------|----------------------------------------------|
+| Admin    | admin@example.com      | password | All abilities (full access)                  |
+| Agent    | agent1@example.com     | password | View/update tickets, manage comments         |
+| Agent    | agent2@example.com     | password | View/update tickets, manage comments         |
+| Customer | customer1@example.com  | password | Create/view own tickets, create comments     |
+| Customer | customer2@example.com  | password | Create/view own tickets, create comments     |
+| Customer | customer3@example.com  | password | Create/view own tickets, create comments     |
+| Customer | customer4@example.com  | password | Create/view own tickets, create comments     |
+| Customer | customer5@example.com  | password | Create/view own tickets, create comments     |
+
+## Token Abilities
+
+The API uses Laravel Sanctum token abilities for fine-grained access control:
+
+### Admin Abilities
+- `tickets:view` - View tickets
+- `tickets:create` - Create tickets
+- `tickets:update` - Update tickets
+- `tickets:delete` - Delete tickets
+- `tickets:create-any` - Create tickets for any user
+- `tickets:update-any` - Update any ticket
+- `tickets:delete-any` - Delete any ticket
+- `comments:view` - View comments
+- `comments:create` - Create comments
+- `comments:create-internal` - Create internal comments
+- `users:view` - View users
+- `users:manage` - Manage users
+
+### Agent Abilities
+- `tickets:view` - View tickets
+- `tickets:update` - Update assigned tickets
+- `comments:view` - View all comments (including internal)
+- `comments:create` - Create comments
+- `comments:create-internal` - Create internal comments
+- `users:view` - View users
+
+### Customer Abilities
+- `tickets:view` - View own tickets
+- `tickets:create` - Create tickets
+- `tickets:update` - Update own tickets
+- `tickets:delete` - Delete own open tickets
+- `comments:view` - View public comments
+- `comments:create` - Create public comments
+
+## API Versioning
+
+The API uses URL-based versioning with the `/api/v1` prefix.
+
+### Current Version: v1
+
+All endpoints are prefixed with `/api/v1`:
+
+```
+POST   /api/v1/auth/token
+GET    /api/v1/tickets
+POST   /api/v1/tickets
+...
+```
+
+### Route Organization
+
+API routes are organized by version:
+
+- `routes/api.php` - Main API router that includes version-specific route files
+- `routes/api_v1.php` - All v1 API routes and rate limiters
+
+### Future Versioning (v2)
+
+To introduce a new API version without breaking existing clients:
+
+1. **Create new route file** `routes/api_v2.php`
+2. **Add to main router** in `routes/api.php`:
+   ```php
+   Route::prefix('v2')->group(base_path('routes/api_v2.php'));
+   ```
+3. **Create new controllers** in `app/Http/Controllers/Api/V2/`
+4. **Create new resources** in `app/Http/Resources/V2/`
+5. **Maintain v1** routes and controllers for backward compatibility
+6. **Document changes** in API documentation
+
+This approach allows:
+- Existing v1 clients continue working without changes
+- New clients can use v2 features
+- Gradual migration path for clients
+- Clear deprecation timeline for old versions
+
+## Rate Limiting
+
+The API implements rate limiting to prevent abuse:
+
+### Auth Endpoints
+- **Limit**: 5 requests per minute per IP
+- **Applies to**: `POST /api/v1/auth/token`
+
+### API Endpoints
+- **Limit**: 60 requests per minute per user (or IP for unauthenticated)
+- **Applies to**: All authenticated endpoints
+
+### Rate Limit Headers
+
+Responses include rate limit headers:
+```
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 59
+Retry-After: 60 (when limit exceeded)
+```
+
+### Rate Limit Exceeded Response
+
+```json
+{
+  "message": "Too Many Attempts.",
+  "exception": "Illuminate\\Http\\Exceptions\\ThrottleRequestsException"
+}
+```
+
+## Postman Testing
+
+A Postman collection is included in the repository: `postman_collection.json`
+
+### Import Collection
+
+1. Open Postman
+2. Click **Import**
+3. Select `postman_collection.json`
+
+### Setup Environment
+
+Create a Postman environment with:
+
+```json
+{
+  "base_url": "http://localhost:8000/api/v1",
+  "token": ""
+}
+```
+
+### Authentication Flow
+
+1. **Login**: Use the "Create Token" request with test user credentials
+2. **Copy Token**: The response includes a `token` field
+3. **Set Token**: Save the token to your environment variable
+4. **Use Token**: All other requests automatically use the token
+
+### Collection Structure
+
+- **Authentication**
+  - Create Token
+  - Revoke Token
+- **Tickets**
+  - List Tickets
+  - Create Ticket
+  - Show Ticket
+  - Update Ticket (PATCH)
+  - Replace Ticket (PUT)
+  - Delete Ticket
+  - List with Filters
+  - List with Sorting
+  - List with Includes
+- **Ticket Comments**
+  - List Comments
+  - Create Comment
+  - Create Internal Comment
+- **Users**
+  - List Users
+  - Show User
+- **Health**
+  - Health Check
+- **Error Examples**
+  - Unauthorized Request
+  - Forbidden Request
+  - Validation Error
+  - Not Found
+
+## Principle of Least Privilege
+
+The API enforces the principle of least privilege at multiple levels:
+
+### 1. Token Abilities
+
+Users receive only the abilities required for their role:
+- Customers cannot access `users:view` or `users:manage`
+- Agents cannot delete tickets (`tickets:delete-any`)
+- Only admins have full access
+
+### 2. Request Validation
+
+Form requests strip forbidden fields before validation:
+- Customers cannot set `status`, `priority`, or `assigned_to` fields
+- `UpdateTicketRequest` removes these fields in `prepareForValidation()`
+- `StoreTicketCommentRequest` forces `is_internal` to `false` for customers
+
+### 3. Policy Authorization
+
+Policies enforce ownership and role-based rules:
+- Customers can only view/update their own tickets
+- Agents can only update assigned tickets (unless they have `tickets:update-any`)
+- Customers can only delete tickets with `status = 'open'`
+
+### 4. Resource Filtering
+
+API resources hide sensitive data based on user role:
+- Customers cannot see `is_internal` flag on comments
+- Internal comments are filtered out for customers in queries
+
+### 5. Query Scoping
+
+Controllers automatically scope queries:
+- Customer ticket listings are filtered to `user_id = current_user`
+- Customers cannot use `filter[customer_id]` to view other users' tickets
+- Comment listings filter out internal comments for customers
+
+### Implementation Example
+
+```php
+// In UpdateTicketRequest
+protected function prepareForValidation(): void
+{
+    if ($this->user()->isCustomer()) {
+        $this->request->remove('status');
+        $this->request->remove('priority');
+        $this->request->remove('assigned_to');
+    }
+}
+
+// In TicketController
+if ($user->isCustomer()) {
+    $query->where('user_id', $user->id);
+}
+
+// In TicketPolicy
+public function delete(User $user, Ticket $ticket): bool
+{
+    if ($user->isCustomer() && $ticket->user_id === $user->id && $ticket->status === 'open') {
+        return true;
+    }
+    return false;
+}
+```
+
+## API Endpoints
+
+### Authentication
+
+```
+POST   /api/v1/auth/token       - Create authentication token
+DELETE /api/v1/auth/token       - Revoke authentication token
+```
+
+### Tickets
+
+```
+GET    /api/v1/tickets          - List tickets (with filtering, sorting, pagination)
+POST   /api/v1/tickets          - Create ticket
+GET    /api/v1/tickets/{id}     - Show ticket
+PATCH  /api/v1/tickets/{id}     - Update ticket (partial)
+PUT    /api/v1/tickets/{id}     - Replace ticket (full)
+DELETE /api/v1/tickets/{id}     - Delete ticket
+```
+
+### Ticket Comments
+
+```
+GET    /api/v1/tickets/{id}/comments  - List ticket comments
+POST   /api/v1/tickets/{id}/comments  - Create ticket comment
+```
+
+### Users
+
+```
+GET    /api/v1/users            - List users (admin/agent only)
+GET    /api/v1/users/{id}       - Show user (admin/agent only)
+```
+
+### Health
+
+```
+GET    /api/v1/health           - API health check
+```
+
+## Query Parameters
+
+### Filtering
+
+```
+GET /api/v1/tickets?filter[status]=open
+GET /api/v1/tickets?filter[priority]=urgent
+GET /api/v1/tickets?filter[customer_id]=5
+GET /api/v1/tickets?filter[assigned_to]=2
+GET /api/v1/tickets?filter[created_after]=2026-01-01
+```
+
+### Sorting
+
+```
+GET /api/v1/tickets?sort=created_at           # Ascending
+GET /api/v1/tickets?sort=-created_at          # Descending
+GET /api/v1/tickets?sort=priority,-created_at # Multiple fields
+```
+
+Allowed sort fields: `created_at`, `updated_at`, `priority`, `status`
+
+### Includes
+
+```
+GET /api/v1/tickets?include=customer
+GET /api/v1/tickets?include=customer,assignedAgent
+GET /api/v1/tickets?include=customer,assignedAgent,comments
+```
+
+Allowed includes: `customer`, `assignedAgent`, `comments`
+
+### Pagination
+
+```
+GET /api/v1/tickets?page=2&per_page=20
+```
+
+## Response Format
+
+### Success Response
+
+```json
+{
+  "status": "success",
+  "message": "Request successful.",
+  "data": {}
+}
+```
+
+### Error Response
+
+```json
+{
+  "status": "error",
+  "message": "Error message.",
+  "errors": {}
+}
+```
+
+### Validation Error
+
+```json
+{
+  "status": "error",
+  "message": "Validation failed.",
+  "errors": {
+    "field": ["Error message"]
+  }
+}
+```
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-
----
-# Helpdesk Ticket API
-## 1. Project setup steps
-
-1. Install a new Laravel project - laravel new Helpdask-Ticket-API
-2. Create a New Database 
-3. Create a .env file and add the database credentials
-4. Create a migration and add a new table like tickets, ticket_comments
-5. Run the migrations
-6. Create a seeder and add some data
-7. Run the seeder
-
-## 2. .env variables required
- - DB_CONNECTION=mysql
- - DB_HOST=127.0.0.1
- - DB_PORT=3306
- - DB_DATABASE=helpdask_ticket_api
- - DB_USERNAME=root
- - DB_PASSWORD=
-
-## 3. Migration and seeding commands
- - php artisan make:migration create_tickets_table
- - php artisan migrate
- - php artisan db:seed
-
-## 4. How to run the API locally
-- php artisan serve
-- Open the browser and enter the following URL: http://localhost:8000/api/login
-- Enter the following credentials:
-- email:
-- password:
-
-
----
-
-## Tasks 2 
-## 1. how a future /api/v2 could be introduced without breaking existing clients.
- - Create a new routes group for the new version of the API, and add a new version number to the appserviceprovider.php file as the new version. So whenever a new version is released, like /api/v2, so as not to break existing clients.
- - Create a new controller for the new version of the API,
-
----
-## Tasks 3
-## 1. Include token expiration awareness
+This project is open-sourced software licensed under the MIT license.

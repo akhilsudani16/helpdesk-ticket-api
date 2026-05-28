@@ -82,7 +82,9 @@ class DatabaseSeeder extends Seeder
                 $commentAuthor = fake()->boolean(70) ? $customer : $agents->random();
 
                 // Customers can only create public comments
-                $isInternal = ($commentAuthor->isAgent() || $commentAuthor->isAdmin()) && fake()->boolean(50);
+                $isInternal = $commentAuthor->isAgent() || $commentAuthor->isAdmin() 
+                    ? fake()->boolean(50) 
+                    : false;
 
                 TicketComment::factory()
                     ->for($ticket)

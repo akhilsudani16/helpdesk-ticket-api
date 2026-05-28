@@ -17,8 +17,8 @@ return new class extends Migration
             $table->foreignId('assigned_to')->nullable()->constrained('users')->onDelete('set null');
             $table->string('title');
             $table->text('description');
-            $table->enum('status', ['open', 'in_progress', 'resolved', 'closed']);
-            $table->enum('priority', ['low', 'medium', 'high', 'urgent']);
+            $table->enum('status', ['open', 'in_progress', 'resolved', 'closed'])->default('open');
+            $table->enum('priority', ['low', 'medium', 'high', 'urgent'])->default('medium');
             $table->softDeletes();
             $table->timestamps();
 
