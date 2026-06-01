@@ -11,7 +11,7 @@ test('user can generate token with valid credentials', function () {
     $response = $this->postJson('/api/v1/auth/token', [
         'email' => 'test@example.com',
         'password' => 'password',
-        'device_name' => 'Test Device',
+        'device_name' => 'Postman',
     ]);
 
     $response->assertStatus(200)

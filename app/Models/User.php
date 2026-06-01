@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Enums\UserRole;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -29,37 +30,55 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'role' => 'string',
+            'role' => UserRole::class,
         ];
     }
 
+    /**
+     * Get the tickets created by this user.
+     */
     public function tickets(): HasMany
     {
         return $this->hasMany(Ticket::class, 'user_id');
     }
 
+    /**
+     * Get the tickets assigned to this user (agent).
+     */
     public function assignedTickets(): HasMany
     {
         return $this->hasMany(Ticket::class, 'assigned_to');
     }
 
+    /**
+     * Get the comments created by this user.
+     */
     public function comments(): HasMany
     {
         return $this->hasMany(TicketComment::class);
     }
 
+    /**
+     * Check if user is an admin.
+     */
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return $this->role === UserRole::ADMIN;
     }
 
+    /**
+     * Check if user is an agent.
+     */
     public function isAgent(): bool
     {
-        return $this->role === 'agent';
+        return $this->role === UserRole::AGENT;
     }
 
+    /**
+     * Check if user is a customer.
+     */
     public function isCustomer(): bool
     {
-        return $this->role === 'customer';
+        return $this->role === UserRole::CUSTOMER;
     }
 }

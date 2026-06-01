@@ -2,290 +2,214 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\ApiController;
 use App\Http\Requests\Api\V1\ReplaceTicketRequest;
 use App\Http\Requests\Api\V1\StoreTicketRequest;
 use App\Http\Requests\Api\V1\UpdateTicketRequest;
 use App\Http\Resources\V1\TicketCollection;
 use App\Http\Resources\V1\TicketResource;
 use App\Models\Ticket;
-use App\Support\ApiResponse;
+use App\Policies\TicketPolicy;
 use App\Support\Filters\TicketFilter;
-use Illuminate\Http\Request;
 
 /**
  * @group Tickets
- *
+ * 
  * APIs for managing support tickets
  */
-class TicketController extends Controller
+class TicketController extends ApiController
 {
+    protected $policyClass = TicketPolicy::class;
+
     /**
      * List tickets
-     *
+     * 
      * Get a paginated list of tickets with optional filtering and sorting.
-     *
+     * 
      * @authenticated
-     *
-     * @queryParam include string Comma-separated list of relationships to include (customer,assignedAgent,comments). Example: customer,comments
+     * 
+     * @queryParam include string Comma-separated list of relationships to include. Example: customer,comments
      * @queryParam filter[status] string Filter by status. Example: open
      * @queryParam filter[priority] string Filter by priority. Example: high
      * @queryParam filter[customer_id] integer Filter by customer ID. Example: 5
      * @queryParam filter[assigned_to] integer Filter by assigned agent ID. Example: 2
      * @queryParam filter[created_after] string Filter by creation date. Example: 2026-01-01
-     * @queryParam sort string Sort by field(s). Prefix with - for descending. Example: -created_at
+     * @queryParam sort string Sort by field. Prefix with - for descending. Example: -created_at
      * @queryParam page integer Page number. Example: 1
      * @queryParam per_page integer Items per page. Example: 15
      */
-    public function index(Request $request)
+    public function index(TicketFilter $filters)
     {
-        $this->authorize('viewAny', Ticket::class);
-
-        $user = $request->user();
-
-        $query = Ticket::query();
-
-        $query->with(['customer', 'assignedAgent']);
-
-        if ($user->isCustomer()) {
-            $query->where('user_id', $user->id);
-
-            //TODO - check if customer show some filter and same for agent and admin
-
-            if ($request->has('filter.customer_id') && $request->input('filter.customer_id') != $user->id) {
-                return ApiResponse::forbidden('You cannot view other customers\' tickets.');
-            }
+        if (!$this->isAble('tickets.viewAny')) {
+            return $this->notAuthorized('You cannot view tickets');
         }
 
-        $filter = new TicketFilter($query, $request);
-        $query = $filter->apply();
+        // Validate includes
+        $allowedIncludes = ['customer', 'assignedAgent', 'comments'];
+        $requestedIncludes = $this->validateIncludes($allowedIncludes);
 
-        $this->applySorting($query, $request);
+        // Build query with conditional eager loading
+        $query = Ticket::filter($filters);
 
-        $this->loadIncludes($query, $request);
+        // Conditionally eager load relationships to avoid N+1
+        if (!empty($requestedIncludes)) {
+            $eagerLoad = [];
+            foreach ($requestedIncludes as $include) {
+                if ($include === 'comments') {
+                    $eagerLoad[] = 'comments.user';
+                } else {
+                    $eagerLoad[] = $include;
+                }
+            }
+            $query->with($eagerLoad);
+        }
 
-        $perPage = $request->query('per_page', 15);
-        $tickets = $query->paginate($perPage);
+        $tickets = $query->paginate($this->request->query('per_page', 15));
 
-        return new TicketCollection($tickets);
+        return TicketCollection::make($tickets);
     }
 
     /**
      * Create ticket
-     *
+     * 
      * Create a new support ticket.
-     *
+     * 
      * @authenticated
-     *
-     * @bodyParam title string required Ticket title (5-120 characters). Example: Payment failed
-     * @bodyParam description string required Ticket description (min 20 characters). Example: I paid for the plan, but my account is not upgraded.
+     * 
+     * @bodyParam title string required Ticket title. Example: Payment failed
+     * @bodyParam description string required Ticket description. Example: I paid but account not upgraded.
      * @bodyParam priority string required Priority level. Example: high
      * @bodyParam user_id integer User ID (admin only). Example: 5
      */
     public function store(StoreTicketRequest $request)
     {
-        $this->authorize('create', Ticket::class);
+        if (!$this->isAble('tickets.create')) {
+            return $this->notAuthorized('You cannot create tickets');
+        }
 
-        $user = $request->user();
         $data = $request->validated();
 
-        if (isset($data['user_id'])) {
-            if (!$user->can('createAny', Ticket::class)) {
-                return ApiResponse::forbidden('You cannot create tickets for other users.');
-            }
-        } else {
-            $data['user_id'] = $user->id;
+        if (isset($data['user_id']) && !$this->isAble('tickets.createAny')) {
+            return $this->notAuthorized('You cannot create tickets for other users');
+        }
+
+        if (!isset($data['user_id'])) {
+            $data['user_id'] = $this->request->user()->id;
         }
 
         $ticket = Ticket::create($data);
-
         $ticket->load(['customer', 'assignedAgent']);
 
-        return ApiResponse::success(
-            new TicketResource($ticket),
-            'Ticket created successfully.',
-            201
-        );
+        return $this->ok(new TicketResource($ticket), 'Ticket created successfully.', 201);
     }
 
     /**
      * Show ticket
-     *
+     * 
      * Get details of a specific ticket.
-     *
+     * 
      * @authenticated
-     *
+     * 
      * @urlParam ticket integer required The ticket ID. Example: 1
-     * @queryParam include string Comma-separated list of relationships to include. Example: customer,comments
+     * @queryParam include string Comma-separated relationships. Example: customer,comments
      */
-    public function show(Request $request, Ticket $ticket)
+    public function show(Ticket $ticket)
     {
-        $this->authorize('view', $ticket);
+        if (!$this->isAble('tickets.view', $ticket)) {
+            return $this->notAuthorized('You cannot view this ticket');
+        }
 
-        $ticket->load(['customer', 'assignedAgent']);
+        // Validate includes
+        $allowedIncludes = ['customer', 'assignedAgent', 'comments'];
+        $requestedIncludes = $this->validateIncludes($allowedIncludes);
 
-        $this->loadIncludesForModel($ticket, $request);
+        // Always load customer and assignedAgent for single ticket view
+        $defaultRelations = ['customer', 'assignedAgent'];
+        
+        // Add comments if requested
+        if (in_array('comments', $requestedIncludes)) {
+            $defaultRelations[] = 'comments.user';
+        }
 
-        return ApiResponse::success(new TicketResource($ticket));
+        // Eager load relationships
+        $ticket->loadMissing($defaultRelations);
+
+        return $this->ok(new TicketResource($ticket));
     }
 
     /**
      * Update ticket (PATCH)
-     *
-     * Partially update a ticket. Only provided fields will be updated.
-     *
+     * 
+     * Partially update a ticket.
+     * 
      * @authenticated
-     *
+     * 
      * @urlParam ticket integer required The ticket ID. Example: 1
-     * @bodyParam title string Ticket title (5-120 characters). Example: Payment issue resolved
-     * @bodyParam description string Ticket description (min 20 characters). Example: Updated description
-     * @bodyParam status string Status (admin/agent only). Example: in_progress
-     * @bodyParam priority string Priority (admin/agent only). Example: medium
-     * @bodyParam assigned_to integer Assigned agent ID (admin/agent only). Example: 2
+     * @bodyParam title string Ticket title. Example: Updated title
+     * @bodyParam description string Ticket description. Example: Updated description
+     * @bodyParam status string Status. Example: in_progress
+     * @bodyParam priority string Priority. Example: medium
+     * @bodyParam assigned_to integer Assigned agent ID. Example: 2
      */
     public function patch(UpdateTicketRequest $request, Ticket $ticket)
     {
-        $this->authorize('update', $ticket);
+        if (!$this->isAble('tickets.update', $ticket)) {
+            return $this->notAuthorized('You cannot update this ticket');
+        }
 
         $ticket->update($request->validated());
-
         $ticket->load(['customer', 'assignedAgent']);
 
-        return ApiResponse::success(
-            new TicketResource($ticket->fresh()),
-            'Ticket updated successfully.'
-        );
+        return $this->ok(new TicketResource($ticket), 'Ticket updated successfully.');
     }
 
     /**
      * Replace ticket (PUT)
-     *
+     * 
      * Fully replace a ticket. All fields are required.
-     *
+     * 
      * @authenticated
-     *
+     * 
      * @urlParam ticket integer required The ticket ID. Example: 1
-     * @bodyParam title string required Ticket title (5-120 characters). Example: Payment failed
-     * @bodyParam description string required Ticket description (min 20 characters). Example: Full description
+     * @bodyParam title string required Ticket title. Example: Payment failed
+     * @bodyParam description string required Ticket description. Example: Full description
      * @bodyParam status string required Status. Example: open
      * @bodyParam priority string required Priority level. Example: high
      * @bodyParam assigned_to integer Assigned agent ID. Example: 2
      */
     public function update(ReplaceTicketRequest $request, Ticket $ticket)
     {
-        $this->authorize('update', $ticket);
+        if (!$this->isAble('tickets.update', $ticket)) {
+            return $this->notAuthorized('You cannot update this ticket');
+        }
 
-        $user = $request->user();
-
-        if ($user->isCustomer()) {
-            return ApiResponse::forbidden('Customers must use PATCH for partial updates.');
+        if ($this->request->user()->isCustomer()) {
+            return $this->notAuthorized('Customers must use PATCH for partial updates.');
         }
 
         $ticket->update($request->validated());
-
         $ticket->load(['customer', 'assignedAgent']);
 
-        return ApiResponse::success(
-            new TicketResource($ticket->fresh()),
-            'Ticket replaced successfully.'
-        );
+        return $this->ok(new TicketResource($ticket), 'Ticket replaced successfully.');
     }
 
     /**
      * Delete ticket
-     *
-     * Delete a ticket. Customers can only delete their own open tickets.
-     *
+     * 
+     * Delete a ticket.
+     * 
      * @authenticated
-     *
+     * 
      * @urlParam ticket integer required The ticket ID. Example: 1
      */
     public function destroy(Ticket $ticket)
     {
-        $this->authorize('delete', $ticket);
+        if (!$this->isAble('tickets.delete', $ticket)) {
+            return $this->notAuthorized('You cannot delete this ticket');
+        }
 
         $ticket->delete();
 
-        return ApiResponse::success(null, 'Ticket deleted successfully.');
-    }
-
-    /**
-     * Apply sorting to the query.
-     */
-    private function applySorting($query, Request $request): void
-    {
-        $sortParam = $request->query('sort');
-
-        if (!$sortParam) {
-            return;
-        }
-
-        // TODO - create proper sorting
-
-        $allowedSorts = ['created_at', 'updated_at', 'priority', 'status'];
-        $sorts = explode(',', $sortParam);
-
-        foreach ($sorts as $sort) {
-            $direction = 'asc';
-            $field = $sort;
-
-            if (str_starts_with($sort, '-')) {
-                $direction = 'desc';
-                $field = substr($sort, 1);
-            }
-
-            if (!in_array($field, $allowedSorts)) {
-                abort(400, "Unsupported sort field: {$field}. Allowed fields: " . implode(', ', $allowedSorts));
-            }
-
-            $query->orderBy($field, $direction);
-        }
-    }
-
-    /**
-     * Load relationships based on include parameter.
-     */
-    private function loadIncludes($query, Request $request): void
-    {
-        $includes = $request->query('include', '');
-        $includesArray = array_filter(explode(',', $includes));
-
-        $allowedIncludes = ['customer', 'assignedAgent', 'comments'];
-        $validIncludes = [];
-
-        foreach ($includesArray as $include) {
-            if (in_array($include, $allowedIncludes)) {
-                // Only load comments as additional include
-                // customer and assignedAgent are already loaded for summaries
-                if ($include === 'comments') {
-                    $validIncludes[] = $include;
-                }
-            }
-        }
-
-        if (!empty($validIncludes)) {
-            $query->with($validIncludes);
-        }
-    }
-
-    /**
-     * Load relationships for a single model.
-     */
-    private function loadIncludesForModel($model, Request $request): void
-    {
-        $includes = $request->query('include', '');
-        $includesArray = array_filter(explode(',', $includes));
-
-        $allowedIncludes = ['customer', 'assignedAgent', 'comments'];
-
-        foreach ($includesArray as $include) {
-            if (in_array($include, $allowedIncludes)) {
-                // Only load comments as additional include
-                // customer and assignedAgent are already loaded for summaries
-                if ($include === 'comments') {
-                    $model->load($include);
-                }
-            }
-        }
+        return $this->ok(null, 'Ticket deleted successfully.');
     }
 }

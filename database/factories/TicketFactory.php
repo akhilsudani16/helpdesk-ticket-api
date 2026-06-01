@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Enums\TicketPriority;
+use App\Enums\TicketStatus;
 use App\Models\Ticket;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -21,8 +23,8 @@ class TicketFactory extends Factory
         return [
             'title' => fake()->sentence(5),
             'description' => fake()->paragraph(3),
-            'status' => fake()->randomElement(['open', 'in_progress', 'resolved', 'closed']),
-            'priority' => fake()->randomElement(['low', 'medium', 'high', 'urgent']),
+            'status' => fake()->randomElement(TicketStatus::values()),
+            'priority' => fake()->randomElement(TicketPriority::values()),
             'user_id' => User::factory(),
             'assigned_to' => null,
         ];
@@ -44,7 +46,7 @@ class TicketFactory extends Factory
     public function open(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status' => 'open',
+            'status' => TicketStatus::OPEN,
         ]);
     }
 
@@ -54,7 +56,7 @@ class TicketFactory extends Factory
     public function inProgress(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status' => 'in_progress',
+            'status' => TicketStatus::IN_PROGRESS,
         ]);
     }
 
@@ -64,7 +66,7 @@ class TicketFactory extends Factory
     public function resolved(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status' => 'resolved',
+            'status' => TicketStatus::RESOLVED,
         ]);
     }
 
@@ -74,7 +76,47 @@ class TicketFactory extends Factory
     public function closed(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status' => 'closed',
+            'status' => TicketStatus::CLOSED,
+        ]);
+    }
+
+    /**
+     * Indicate that the ticket has low priority.
+     */
+    public function lowPriority(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'priority' => TicketPriority::LOW,
+        ]);
+    }
+
+    /**
+     * Indicate that the ticket has medium priority.
+     */
+    public function mediumPriority(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'priority' => TicketPriority::MEDIUM,
+        ]);
+    }
+
+    /**
+     * Indicate that the ticket has high priority.
+     */
+    public function highPriority(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'priority' => TicketPriority::HIGH,
+        ]);
+    }
+
+    /**
+     * Indicate that the ticket has urgent priority.
+     */
+    public function urgentPriority(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'priority' => TicketPriority::URGENT,
         ]);
     }
 }

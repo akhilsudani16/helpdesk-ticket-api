@@ -5,6 +5,7 @@ namespace App\Policies;
 use App\Models\Ticket;
 use App\Models\TicketComment;
 use App\Models\User;
+use App\Permissions\V1\Abilities;
 
 class TicketCommentPolicy
 {
@@ -13,7 +14,8 @@ class TicketCommentPolicy
      */
     public function viewAny(User $user, Ticket $ticket): bool
     {
-        return $user->tokenCan('comments:view') && $user->can('view', $ticket);
+        // User must be able to view the ticket to view its comments
+        return $user->tokenCan(Abilities::ViewComments) && $user->can('view', $ticket);
     }
 
     /**
@@ -21,10 +23,11 @@ class TicketCommentPolicy
      */
     public function view(User $user, TicketComment $comment): bool
     {
-        if (!$user->tokenCan('comments:view')) {
+        if (!$user->tokenCan(Abilities::ViewComments)) {
             return false;
         }
 
+        // Admin and agents can see all comments
         if ($user->isAdmin() || $user->isAgent()) {
             return true;
         }
@@ -38,7 +41,8 @@ class TicketCommentPolicy
      */
     public function create(User $user, Ticket $ticket): bool
     {
-        return $user->tokenCan('comments:create') && $user->can('view', $ticket);
+        // User must be able to view the ticket to comment on it
+        return $user->tokenCan(Abilities::CreateComment) && $user->can('view', $ticket);
     }
 
     /**
@@ -46,7 +50,7 @@ class TicketCommentPolicy
      */
     public function createInternal(User $user): bool
     {
-        return $user->tokenCan('comments:create-internal') &&
+        return $user->tokenCan(Abilities::CreateInternalComment) && 
                ($user->isAdmin() || $user->isAgent());
     }
 }

@@ -2,97 +2,74 @@
 
 namespace Database\Seeders;
 
+use App\Enums\TicketStatus;
+use App\Enums\UserRole;
 use App\Models\Ticket;
 use App\Models\TicketComment;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
 
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // Create admin user
-        $admin = User::factory()->admin()->create([
-            'name' => 'Admin User',
-            'email' => 'admin@example.com',
+        $this->command->info('Starting database seeding...');
+
+        // Disable foreign key checks for better performance
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+
+        // Truncate tables for clean seeding
+        $this->command->info('Cleaning existing data...');
+        TicketComment::truncate();
+        Ticket::truncate();
+        User::truncate();
+
+        // Re-enable foreign key checks
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
+        // Call individual seeders
+        $this->call([
+            UserSeeder::class,
+            TicketSeeder::class,
+            TicketCommentSeeder::class,
         ]);
 
-        // Create agent users
-        $agent1 = User::factory()->agent()->create([
-            'name' => 'Agent One',
-            'email' => 'agent1@example.com',
-        ]);
+        $this->command->info('Database seeding completed successfully!');
+        $this->printSeedingSummary();
+    }
 
-        $agent2 = User::factory()->agent()->create([
-            'name' => 'Agent Two',
-            'email' => 'agent2@example.com',
-        ]);
+    private function printSeedingSummary(): void
+    {
+        $userCount = User::count();
+        $ticketCount = Ticket::count();
+        $commentCount = TicketComment::count();
 
-        // Create customer users
-        $customer1 = User::factory()->customer()->create([
-            'name' => 'Customer One',
-            'email' => 'customer1@example.com',
-        ]);
+        $this->command->info('');
+        $this->command->info('Seeding Summary:');
+        $this->command->info("   Users: {$userCount}");
+        $this->command->info("   Tickets: {$ticketCount}");
+        $this->command->info("   Comments: {$commentCount}");
+        $this->command->info('');
 
-        $customer2 = User::factory()->customer()->create([
-            'name' => 'Customer Two',
-            'email' => 'customer2@example.com',
-        ]);
+        // Role breakdown
+        $adminCount = User::where('role', UserRole::ADMIN)->count();
+        $agentCount = User::where('role', UserRole::AGENT)->count();
+        $customerCount = User::where('role', UserRole::CUSTOMER)->count();
 
-        $customer3 = User::factory()->customer()->create([
-            'name' => 'Customer Three',
-            'email' => 'customer3@example.com',
-        ]);
+        $this->command->info('User Roles:');
+        $this->command->info("   Admins: {$adminCount}");
+        $this->command->info("   Agents: {$agentCount}");
+        $this->command->info("   Customers: {$customerCount}");
+        $this->command->info('');
 
-        $customer4 = User::factory()->customer()->create([
-            'name' => 'Customer Four',
-            'email' => 'customer4@example.com',
-        ]);
-
-        $customer5 = User::factory()->customer()->create([
-            'name' => 'Customer Five',
-            'email' => 'customer5@example.com',
-        ]);
-
-        $customers = collect([$customer1, $customer2, $customer3, $customer4, $customer5]);
-
-        // Get all agents and customers
-        $agents = User::where('role', 'agent')->get();
-
-        // Create tickets
-        for ($i = 0; $i < 30; $i++) {
-            $customer = $customers->random();
-            $assignedAgent = fake()->boolean(70) ? $agents->random() : null;
-
-            $ticket = Ticket::factory()
-                ->for($customer, 'customer')
-                ->when($assignedAgent, fn ($query) => $query->state(['assigned_to' => $assignedAgent->id]))
-                ->create();
-
-            // Create comments for each ticket (at least 2)
-            $commentCount = fake()->numberBetween(2, 5);
-            for ($j = 0; $j < $commentCount; $j++) {
-                // 70% chance the comment is from customer, 30% from agents
-                $commentAuthor = fake()->boolean(70) ? $customer : $agents->random();
-
-                // Customers can only create public comments
-                $isInternal = $commentAuthor->isAgent() || $commentAuthor->isAdmin() 
-                    ? fake()->boolean(50) 
-                    : false;
-
-                TicketComment::factory()
-                    ->for($ticket)
-                    ->for($commentAuthor, 'user')
-                    ->state(['is_internal' => $isInternal])
-                    ->create();
-            }
+        // Status breakdown
+        foreach (TicketStatus::cases() as $status) {
+            $count = Ticket::where('status', $status)->count();
+            $this->command->info("   {$status->label()}: {$count}");
         }
     }
 }
-

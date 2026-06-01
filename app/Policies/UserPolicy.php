@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Models\User;
+use App\Permissions\V1\Abilities;
 
 class UserPolicy
 {
@@ -11,7 +12,7 @@ class UserPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->tokenCan('users:view') && ($user->isAdmin() || $user->isAgent());
+        return $user->tokenCan(Abilities::ViewUsers) && ($user->isAdmin() || $user->isAgent());
     }
 
     /**
@@ -19,10 +20,11 @@ class UserPolicy
      */
     public function view(User $user, User $model): bool
     {
-        if (!$user->tokenCan('users:view')) {
+        if (!$user->tokenCan(Abilities::ViewUsers)) {
             return false;
         }
 
+        // Admin and agents can view users
         return $user->isAdmin() || $user->isAgent();
     }
 
@@ -31,6 +33,6 @@ class UserPolicy
      */
     public function manage(User $user): bool
     {
-        return $user->tokenCan('users:manage') && $user->isAdmin();
+        return $user->tokenCan(Abilities::ManageUsers) && $user->isAdmin();
     }
 }

@@ -19,7 +19,8 @@ return new class extends Migration
             $table->boolean('is_internal')->default(false);
             $table->timestamps();
 
-
+            $table->index('ticket_id');
+            $table->index('user_id');
         });
     }
 

@@ -2,8 +2,9 @@
 
 namespace App\Http\Requests\Api\V1;
 
-use Illuminate\Contracts\Validation\ValidationRule;
+use App\Enums\TicketPriority;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreTicketRequest extends FormRequest
 {
@@ -18,44 +19,20 @@ class StoreTicketRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, ValidationRule|array|string>
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
             'title' => ['required', 'string', 'min:5', 'max:120'],
             'description' => ['required', 'string', 'min:20'],
-            'priority' => ['required', 'in:low,medium,high,urgent'],
-            'user_id' => ['sometimes', 'integer', 'exists:users,id'],
+            'priority' => ['required', Rule::in(TicketPriority::values())],
+            'user_id' => [
+                'sometimes',
+                'integer',
+                'exists:users,id',
+                Rule::prohibitedIf(! ($this->user()?->isAdmin() ?? false)),
+            ],
         ];
-    }
-
-    /**
-     * Get validated data with forbidden fields removed.
-     */
-    public function validated($key = null, $default = null)
-    {
-        $validated = parent::validated($key, $default);
-        $user = $this->user();
-
-        if ($user && !$user->isAdmin()) {
-            unset($validated['user_id']);
-        }
-
-        return $validated;
-    }
-
-    /**
-     * Prepare the data for validation.
-     */
-    protected function prepareForValidation(): void
-    {
-        $user = $this->user();
-
-        if ($user && !$user->isAdmin()) {
-            $input = $this->all();
-            unset($input['user_id']);
-            $this->replace($input);
-        }
     }
 }

@@ -2,8 +2,9 @@
 
 namespace App\Http\Requests\Api\V1;
 
-use Illuminate\Contracts\Validation\ValidationRule;
+use App\Enums\DeviceName;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreAuthTokenRequest extends FormRequest
 {
@@ -18,14 +19,25 @@ class StoreAuthTokenRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, ValidationRule|array|string>
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
+            // 'email' => ['required', 'email:rfc,dns'],
             'email' => ['required', 'email'],
             'password' => ['required', 'string'],
-            'device_name' => ['required', 'string', 'max:255'],
+            'device_name' => ['required', 'string', Rule::in(DeviceName::values())],
+        ];
+    }
+
+    /**
+     * Custom validation messages for request rules.
+     */
+    public function messages(): array
+    {
+        return [
+            'device_name.in' => 'The selected device name is invalid. Allowed devices are: '.implode(', ', DeviceName::values()),
         ];
     }
 }

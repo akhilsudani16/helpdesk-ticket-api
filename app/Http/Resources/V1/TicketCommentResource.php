@@ -19,11 +19,13 @@ class TicketCommentResource extends JsonResource
         return [
             'id' => $this->id,
             'body' => $this->body,
+            // Only show is_internal flag to admins and agents
             'is_internal' => $this->when(
                 $user && ($user->isAdmin() || $user->isAgent()),
                 $this->is_internal
             ),
-            'user' => new UserResource($this->whenLoaded('user')),
+            // User relationship - only included when loaded
+            'user' => UserResource::make($this->whenLoaded('user')),
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
         ];

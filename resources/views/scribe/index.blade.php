@@ -26,7 +26,7 @@
             </style>
 
     <script>
-        var tryItOutBaseUrl = "http://helpdesk-ticket-api.test";
+        var tryItOutBaseUrl = "http://localhost:8000";
         var useCsrf = Boolean();
         var csrfUrl = "/sanctum/csrf-cookie";
     </script>
@@ -72,10 +72,12 @@
                 </li>
                                     <ul id="tocify-subheader-authentication" class="tocify-subheader">
                                                     <li class="tocify-item level-2" data-unique="authentication-POSTapi-v1-auth-token">
-                                <a href="#authentication-POSTapi-v1-auth-token">Create authentication token</a>
+                                <a href="#authentication-POSTapi-v1-auth-token">Create authentication token
+* Generate a new API token for the user.</a>
                             </li>
                                                                                 <li class="tocify-item level-2" data-unique="authentication-DELETEapi-v1-auth-token">
-                                <a href="#authentication-DELETEapi-v1-auth-token">Revoke authentication token</a>
+                                <a href="#authentication-DELETEapi-v1-auth-token">Revoke authentication token
+* Delete the current user's API token.</a>
                             </li>
                                                                         </ul>
                             </ul>
@@ -99,6 +101,9 @@
                             </li>
                                                                                 <li class="tocify-item level-2" data-unique="ticket-comments-POSTapi-v1-tickets--ticket_id--comments">
                                 <a href="#ticket-comments-POSTapi-v1-tickets--ticket_id--comments">Create ticket comment</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="ticket-comments-DELETEapi-v1-tickets--ticket_id--comments--comment_id-">
+                                <a href="#ticket-comments-DELETEapi-v1-tickets--ticket_id--comments--comment_id-">Delete ticket comment</a>
                             </li>
                                                                         </ul>
                             </ul>
@@ -149,7 +154,7 @@
     </ul>
 
     <ul class="toc-footer" id="last-updated">
-        <li>Last updated: May 28, 2026</li>
+        <li>Last updated: May 31, 2026</li>
     </ul>
 </div>
 
@@ -159,7 +164,7 @@
         <h1 id="introduction">Introduction</h1>
 <p>Helpdesk Ticket API - A production-style REST API for managing support tickets</p>
 <aside>
-    <strong>Base URL</strong>: <code>http://helpdesk-ticket-api.test</code>
+    <strong>Base URL</strong>: <code>http://localhost:8000</code>
 </aside>
 <pre><code>This documentation aims to provide all the information you need to work with our API.
 
@@ -171,14 +176,19 @@ You can switch the language used with the tabs at the top right (or from the nav
 
         <h1 id="authentication">Authentication</h1>
 
-    <p>APIs for managing authentication tokens</p>
+    <ul>
+<li>APIs for managing authentication tokens</li>
+</ul>
 
-                                <h2 id="authentication-POSTapi-v1-auth-token">Create authentication token</h2>
+                                <h2 id="authentication-POSTapi-v1-auth-token">Create authentication token
+* Generate a new API token for the user.</h2>
 
 <p>
 </p>
 
-<p>Generate a new API token for the user.</p>
+<ul>
+<li>@bodyParam email string required The user's email address. Example: admin@example.com</li>
+</ul>
 
 <span id="example-requests-POSTapi-v1-auth-token">
 <blockquote>Example request:</blockquote>
@@ -186,11 +196,11 @@ You can switch the language used with the tabs at the top right (or from the nav
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://helpdesk-ticket-api.test/api/v1/auth/token" \
+    "http://localhost:8000/api/v1/auth/token" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"email\": \"admin@example.com\",
+    \"email\": \"gbailey@example.net\",
     \"password\": \"password\",
     \"device_name\": \"Postman\"
 }"
@@ -199,7 +209,7 @@ You can switch the language used with the tabs at the top right (or from the nav
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://helpdesk-ticket-api.test/api/v1/auth/token"
+    "http://localhost:8000/api/v1/auth/token"
 );
 
 const headers = {
@@ -208,7 +218,7 @@ const headers = {
 };
 
 let body = {
-    "email": "admin@example.com",
+    "email": "gbailey@example.net",
     "password": "password",
     "device_name": "Postman"
 };
@@ -222,24 +232,7 @@ fetch(url, {
 </span>
 
 <span id="example-responses-POSTapi-v1-auth-token">
-            <blockquote>
-            <p>Example response (200):</p>
-        </blockquote>
-                <pre>
-
-<code class="language-json" style="max-height: 300px;">{
-    &quot;status&quot;: &quot;success&quot;,
-    &quot;message&quot;: &quot;Token created successfully.&quot;,
-    &quot;data&quot;: {
-        &quot;token&quot;: &quot;1|abc123...&quot;,
-        &quot;abilities&quot;: [
-            &quot;tickets:view&quot;,
-            &quot;tickets:create&quot;
-        ]
-    }
-}</code>
- </pre>
-    </span>
+</span>
 <span id="execution-results-POSTapi-v1-auth-token" hidden>
     <blockquote>Received response<span
                 id="execution-response-status-POSTapi-v1-auth-token"></span>:
@@ -319,10 +312,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="email"                data-endpoint="POSTapi-v1-auth-token"
-               value="admin@example.com"
+               value="gbailey@example.net"
                data-component="body">
     <br>
-<p>The user's email address. Example: <code>admin@example.com</code></p>
+<p>Must be a valid email address. Example: <code>gbailey@example.net</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>password</code></b>&nbsp;&nbsp;
@@ -350,13 +343,15 @@ You can check the Dev Tools console for debugging information.</code></pre>
         </div>
         </form>
 
-                    <h2 id="authentication-DELETEapi-v1-auth-token">Revoke authentication token</h2>
+                    <h2 id="authentication-DELETEapi-v1-auth-token">Revoke authentication token
+* Delete the current user&#039;s API token.</h2>
 
 <p>
-<small class="badge badge-darkred">requires authentication</small>
 </p>
 
-<p>Delete the current user's API token.</p>
+<ul>
+<li>@authenticated</li>
+</ul>
 
 <span id="example-requests-DELETEapi-v1-auth-token">
 <blockquote>Example request:</blockquote>
@@ -364,14 +359,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request DELETE \
-    "http://helpdesk-ticket-api.test/api/v1/auth/token" \
+    "http://localhost:8000/api/v1/auth/token" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://helpdesk-ticket-api.test/api/v1/auth/token"
+    "http://localhost:8000/api/v1/auth/token"
 );
 
 const headers = {
@@ -388,17 +383,7 @@ fetch(url, {
 </span>
 
 <span id="example-responses-DELETEapi-v1-auth-token">
-            <blockquote>
-            <p>Example response (200):</p>
-        </blockquote>
-                <pre>
-
-<code class="language-json" style="max-height: 300px;">{
-    &quot;status&quot;: &quot;success&quot;,
-    &quot;message&quot;: &quot;Token revoked successfully.&quot;
-}</code>
- </pre>
-    </span>
+</span>
 <span id="execution-results-DELETEapi-v1-auth-token" hidden>
     <blockquote>Received response<span
                 id="execution-response-status-DELETEapi-v1-auth-token"></span>:
@@ -416,7 +401,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 </span>
 <form id="form-DELETEapi-v1-auth-token" data-method="DELETE"
       data-path="api/v1/auth/token"
-      data-authed="1"
+      data-authed="0"
       data-hasfiles="0"
       data-isarraybody="0"
       autocomplete="off"
@@ -489,14 +474,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://helpdesk-ticket-api.test/api/v1/health" \
+    --get "http://localhost:8000/api/v1/health" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://helpdesk-ticket-api.test/api/v1/health"
+    "http://localhost:8000/api/v1/health"
 );
 
 const headers = {
@@ -616,14 +601,14 @@ Customers can only see public comments.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://helpdesk-ticket-api.test/api/v1/tickets/1/comments" \
+    --get "http://localhost:8000/api/v1/tickets/1/comments" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://helpdesk-ticket-api.test/api/v1/tickets/1/comments"
+    "http://localhost:8000/api/v1/tickets/1/comments"
 );
 
 const headers = {
@@ -771,7 +756,7 @@ Customers can only create public comments.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://helpdesk-ticket-api.test/api/v1/tickets/1/comments" \
+    "http://localhost:8000/api/v1/tickets/1/comments" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
@@ -783,7 +768,7 @@ Customers can only create public comments.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://helpdesk-ticket-api.test/api/v1/tickets/1/comments"
+    "http://localhost:8000/api/v1/tickets/1/comments"
 );
 
 const headers = {
@@ -913,7 +898,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
                value="This issue has been resolved."
                data-component="body">
     <br>
-<p>Comment text (3-2000 characters). Example: <code>This issue has been resolved.</code></p>
+<p>Comment text. Example: <code>This issue has been resolved.</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>is_internal</code></b>&nbsp;&nbsp;
@@ -935,9 +920,170 @@ You can check the Dev Tools console for debugging information.</code></pre>
             <code>false</code>
         </label>
     <br>
-<p>Whether the comment is internal (admin/agent only). Example: <code>false</code></p>
+<p>Whether the comment is internal. Example: <code>false</code></p>
         </div>
         </form>
+
+                    <h2 id="ticket-comments-DELETEapi-v1-tickets--ticket_id--comments--comment_id-">Delete ticket comment</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>Delete a comment from a ticket.</p>
+
+<span id="example-requests-DELETEapi-v1-tickets--ticket_id--comments--comment_id-">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request DELETE \
+    "http://localhost:8000/api/v1/tickets/1/comments/1" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost:8000/api/v1/tickets/1/comments/1"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "DELETE",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-DELETEapi-v1-tickets--ticket_id--comments--comment_id-">
+</span>
+<span id="execution-results-DELETEapi-v1-tickets--ticket_id--comments--comment_id-" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-DELETEapi-v1-tickets--ticket_id--comments--comment_id-"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-DELETEapi-v1-tickets--ticket_id--comments--comment_id-"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-DELETEapi-v1-tickets--ticket_id--comments--comment_id-" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-DELETEapi-v1-tickets--ticket_id--comments--comment_id-">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-DELETEapi-v1-tickets--ticket_id--comments--comment_id-" data-method="DELETE"
+      data-path="api/v1/tickets/{ticket_id}/comments/{comment_id}"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('DELETEapi-v1-tickets--ticket_id--comments--comment_id-', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-DELETEapi-v1-tickets--ticket_id--comments--comment_id-"
+                    onclick="tryItOut('DELETEapi-v1-tickets--ticket_id--comments--comment_id-');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-DELETEapi-v1-tickets--ticket_id--comments--comment_id-"
+                    onclick="cancelTryOut('DELETEapi-v1-tickets--ticket_id--comments--comment_id-');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-DELETEapi-v1-tickets--ticket_id--comments--comment_id-"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-red">DELETE</small>
+            <b><code>api/v1/tickets/{ticket_id}/comments/{comment_id}</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="DELETEapi-v1-tickets--ticket_id--comments--comment_id-"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="DELETEapi-v1-tickets--ticket_id--comments--comment_id-"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>ticket_id</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="ticket_id"                data-endpoint="DELETEapi-v1-tickets--ticket_id--comments--comment_id-"
+               value="1"
+               data-component="url">
+    <br>
+<p>The ID of the ticket. Example: <code>1</code></p>
+            </div>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>comment_id</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="comment_id"                data-endpoint="DELETEapi-v1-tickets--ticket_id--comments--comment_id-"
+               value="1"
+               data-component="url">
+    <br>
+<p>The ID of the comment. Example: <code>1</code></p>
+            </div>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>ticket</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="ticket"                data-endpoint="DELETEapi-v1-tickets--ticket_id--comments--comment_id-"
+               value="1"
+               data-component="url">
+    <br>
+<p>The ticket ID. Example: <code>1</code></p>
+            </div>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>comment</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="comment"                data-endpoint="DELETEapi-v1-tickets--ticket_id--comments--comment_id-"
+               value="1"
+               data-component="url">
+    <br>
+<p>The comment ID. Example: <code>1</code></p>
+            </div>
+                    </form>
 
                 <h1 id="tickets">Tickets</h1>
 
@@ -957,14 +1103,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://helpdesk-ticket-api.test/api/v1/tickets?include=customer%2Ccomments&amp;filter%5Bstatus%5D=open&amp;filter%5Bpriority%5D=high&amp;filter%5Bcustomer_id%5D=5&amp;filter%5Bassigned_to%5D=2&amp;filter%5Bcreated_after%5D=2026-01-01&amp;sort=-created_at&amp;page=1&amp;per_page=15" \
+    --get "http://localhost:8000/api/v1/tickets?include=customer%2Ccomments&amp;filter%5Bstatus%5D=open&amp;filter%5Bpriority%5D=high&amp;filter%5Bcustomer_id%5D=5&amp;filter%5Bassigned_to%5D=2&amp;filter%5Bcreated_after%5D=2026-01-01&amp;sort=-created_at&amp;page=1&amp;per_page=15" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://helpdesk-ticket-api.test/api/v1/tickets"
+    "http://localhost:8000/api/v1/tickets"
 );
 
 const params = {
@@ -1095,7 +1241,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
                value="customer,comments"
                data-component="query">
     <br>
-<p>Comma-separated list of relationships to include (customer,assignedAgent,comments). Example: <code>customer,comments</code></p>
+<p>Comma-separated list of relationships to include. Example: <code>customer,comments</code></p>
             </div>
                                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>filter[status]</code></b>&nbsp;&nbsp;
@@ -1167,7 +1313,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
                value="-created_at"
                data-component="query">
     <br>
-<p>Sort by field(s). Prefix with - for descending. Example: <code>-created_at</code></p>
+<p>Sort by field. Prefix with - for descending. Example: <code>-created_at</code></p>
             </div>
                                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>page</code></b>&nbsp;&nbsp;
@@ -1209,12 +1355,12 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://helpdesk-ticket-api.test/api/v1/tickets" \
+    "http://localhost:8000/api/v1/tickets" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
     \"title\": \"Payment failed\",
-    \"description\": \"I paid for the plan, but my account is not upgraded.\",
+    \"description\": \"I paid but account not upgraded.\",
     \"priority\": \"high\",
     \"user_id\": 5
 }"
@@ -1223,7 +1369,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://helpdesk-ticket-api.test/api/v1/tickets"
+    "http://localhost:8000/api/v1/tickets"
 );
 
 const headers = {
@@ -1233,7 +1379,7 @@ const headers = {
 
 let body = {
     "title": "Payment failed",
-    "description": "I paid for the plan, but my account is not upgraded.",
+    "description": "I paid but account not upgraded.",
     "priority": "high",
     "user_id": 5
 };
@@ -1330,7 +1476,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
                value="Payment failed"
                data-component="body">
     <br>
-<p>Ticket title (5-120 characters). Example: <code>Payment failed</code></p>
+<p>Ticket title. Example: <code>Payment failed</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>description</code></b>&nbsp;&nbsp;
@@ -1339,10 +1485,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="description"                data-endpoint="POSTapi-v1-tickets"
-               value="I paid for the plan, but my account is not upgraded."
+               value="I paid but account not upgraded."
                data-component="body">
     <br>
-<p>Ticket description (min 20 characters). Example: <code>I paid for the plan, but my account is not upgraded.</code></p>
+<p>Ticket description. Example: <code>I paid but account not upgraded.</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>priority</code></b>&nbsp;&nbsp;
@@ -1384,14 +1530,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://helpdesk-ticket-api.test/api/v1/tickets/1?include=customer%2Ccomments" \
+    --get "http://localhost:8000/api/v1/tickets/1?include=customer%2Ccomments" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://helpdesk-ticket-api.test/api/v1/tickets/1"
+    "http://localhost:8000/api/v1/tickets/1"
 );
 
 const params = {
@@ -1539,7 +1685,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
                value="customer,comments"
                data-component="query">
     <br>
-<p>Comma-separated list of relationships to include. Example: <code>customer,comments</code></p>
+<p>Comma-separated relationships. Example: <code>customer,comments</code></p>
             </div>
                 </form>
 
@@ -1557,7 +1703,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PUT \
-    "http://helpdesk-ticket-api.test/api/v1/tickets/1" \
+    "http://localhost:8000/api/v1/tickets/1" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
@@ -1572,7 +1718,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://helpdesk-ticket-api.test/api/v1/tickets/1"
+    "http://localhost:8000/api/v1/tickets/1"
 );
 
 const headers = {
@@ -1705,7 +1851,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
                value="Payment failed"
                data-component="body">
     <br>
-<p>Ticket title (5-120 characters). Example: <code>Payment failed</code></p>
+<p>Ticket title. Example: <code>Payment failed</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>description</code></b>&nbsp;&nbsp;
@@ -1717,7 +1863,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
                value="Full description"
                data-component="body">
     <br>
-<p>Ticket description (min 20 characters). Example: <code>Full description</code></p>
+<p>Ticket description. Example: <code>Full description</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>status</code></b>&nbsp;&nbsp;
@@ -1763,7 +1909,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 <small class="badge badge-darkred">requires authentication</small>
 </p>
 
-<p>Partially update a ticket. Only provided fields will be updated.</p>
+<p>Partially update a ticket.</p>
 
 <span id="example-requests-PATCHapi-v1-tickets--ticket_id-">
 <blockquote>Example request:</blockquote>
@@ -1771,11 +1917,11 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PATCH \
-    "http://helpdesk-ticket-api.test/api/v1/tickets/1" \
+    "http://localhost:8000/api/v1/tickets/1" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"title\": \"Payment issue resolved\",
+    \"title\": \"Updated title\",
     \"description\": \"Updated description\",
     \"status\": \"in_progress\",
     \"priority\": \"medium\",
@@ -1786,7 +1932,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://helpdesk-ticket-api.test/api/v1/tickets/1"
+    "http://localhost:8000/api/v1/tickets/1"
 );
 
 const headers = {
@@ -1795,7 +1941,7 @@ const headers = {
 };
 
 let body = {
-    "title": "Payment issue resolved",
+    "title": "Updated title",
     "description": "Updated description",
     "status": "in_progress",
     "priority": "medium",
@@ -1916,10 +2062,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="title"                data-endpoint="PATCHapi-v1-tickets--ticket_id-"
-               value="Payment issue resolved"
+               value="Updated title"
                data-component="body">
     <br>
-<p>Ticket title (5-120 characters). Example: <code>Payment issue resolved</code></p>
+<p>Ticket title. Example: <code>Updated title</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>description</code></b>&nbsp;&nbsp;
@@ -1931,7 +2077,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
                value="Updated description"
                data-component="body">
     <br>
-<p>Ticket description (min 20 characters). Example: <code>Updated description</code></p>
+<p>Ticket description. Example: <code>Updated description</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>status</code></b>&nbsp;&nbsp;
@@ -1943,7 +2089,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
                value="in_progress"
                data-component="body">
     <br>
-<p>Status (admin/agent only). Example: <code>in_progress</code></p>
+<p>Status. Example: <code>in_progress</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>priority</code></b>&nbsp;&nbsp;
@@ -1955,7 +2101,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
                value="medium"
                data-component="body">
     <br>
-<p>Priority (admin/agent only). Example: <code>medium</code></p>
+<p>Priority. Example: <code>medium</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>assigned_to</code></b>&nbsp;&nbsp;
@@ -1967,7 +2113,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
                value="2"
                data-component="body">
     <br>
-<p>Assigned agent ID (admin/agent only). Example: <code>2</code></p>
+<p>Assigned agent ID. Example: <code>2</code></p>
         </div>
         </form>
 
@@ -1977,7 +2123,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 <small class="badge badge-darkred">requires authentication</small>
 </p>
 
-<p>Delete a ticket. Customers can only delete their own open tickets.</p>
+<p>Delete a ticket.</p>
 
 <span id="example-requests-DELETEapi-v1-tickets--id-">
 <blockquote>Example request:</blockquote>
@@ -1985,14 +2131,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request DELETE \
-    "http://helpdesk-ticket-api.test/api/v1/tickets/1" \
+    "http://localhost:8000/api/v1/tickets/1" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://helpdesk-ticket-api.test/api/v1/tickets/1"
+    "http://localhost:8000/api/v1/tickets/1"
 );
 
 const headers = {
@@ -2126,14 +2272,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://helpdesk-ticket-api.test/api/v1/users" \
+    --get "http://localhost:8000/api/v1/users" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://helpdesk-ticket-api.test/api/v1/users"
+    "http://localhost:8000/api/v1/users"
 );
 
 const headers = {
@@ -2255,14 +2401,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://helpdesk-ticket-api.test/api/v1/users/1" \
+    --get "http://localhost:8000/api/v1/users/1" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://helpdesk-ticket-api.test/api/v1/users/1"
+    "http://localhost:8000/api/v1/users/1"
 );
 
 const headers = {

@@ -23,11 +23,17 @@ class TicketComment extends Model
         ];
     }
 
+    /**
+     * Get the ticket this comment belongs to.
+     */
     public function ticket(): BelongsTo
     {
         return $this->belongsTo(Ticket::class);
     }
 
+    /**
+     * Get the user who created this comment.
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

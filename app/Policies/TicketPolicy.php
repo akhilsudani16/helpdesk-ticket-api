@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\Ticket;
 use App\Models\User;
+use App\Permissions\V1\Abilities;
 
 class TicketPolicy
 {
@@ -12,7 +13,7 @@ class TicketPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->tokenCan('tickets:view');
+        return $user->tokenCan(Abilities::ViewTickets);
     }
 
     /**
@@ -20,18 +21,21 @@ class TicketPolicy
      */
     public function view(User $user, Ticket $ticket): bool
     {
-        if (!$user->tokenCan('tickets:view')) {
+        if (!$user->tokenCan(Abilities::ViewTickets)) {
             return false;
         }
 
+        // Admin can view all tickets
         if ($user->isAdmin()) {
             return true;
         }
 
+        // Agent can view assigned tickets
         if ($user->isAgent() && $ticket->assigned_to === $user->id) {
             return true;
         }
 
+        // Customer can view their own tickets
         return $ticket->user_id === $user->id;
     }
 
@@ -40,7 +44,7 @@ class TicketPolicy
      */
     public function create(User $user): bool
     {
-        return $user->tokenCan('tickets:create');
+        return $user->tokenCan(Abilities::CreateTicket);
     }
 
     /**
@@ -48,7 +52,7 @@ class TicketPolicy
      */
     public function createAny(User $user): bool
     {
-        return $user->tokenCan('tickets:create-any');
+        return $user->tokenCan(Abilities::CreateAnyTicket);
     }
 
     /**
@@ -56,18 +60,21 @@ class TicketPolicy
      */
     public function update(User $user, Ticket $ticket): bool
     {
-        if (!$user->tokenCan('tickets:update')) {
+        if (!$user->tokenCan(Abilities::UpdateTicket)) {
             return false;
         }
 
-        if ($user->isAdmin() && $user->tokenCan('tickets:update-any')) {
+        // Admin can update any ticket
+        if ($user->isAdmin() && $user->tokenCan(Abilities::UpdateAnyTicket)) {
             return true;
         }
 
+        // Agent can update assigned tickets
         if ($user->isAgent() && $ticket->assigned_to === $user->id) {
             return true;
         }
 
+        // Customer can update their own tickets
         return $ticket->user_id === $user->id;
     }
 
@@ -76,7 +83,7 @@ class TicketPolicy
      */
     public function updateAny(User $user): bool
     {
-        return $user->tokenCan('tickets:update-any');
+        return $user->tokenCan(Abilities::UpdateAnyTicket);
     }
 
     /**
@@ -84,15 +91,17 @@ class TicketPolicy
      */
     public function delete(User $user, Ticket $ticket): bool
     {
-        if (!$user->tokenCan('tickets:delete')) {
+        if (!$user->tokenCan(Abilities::DeleteTicket)) {
             return false;
         }
 
-        if ($user->isAdmin() && $user->tokenCan('tickets:delete-any')) {
+        // Admin can delete any ticket
+        if ($user->isAdmin() && $user->tokenCan(Abilities::DeleteAnyTicket)) {
             return true;
         }
 
-        if ($user->isCustomer() && $ticket->user_id === $user->id && $ticket->status === 'open') {
+        // Customer can delete their own ticket only if status is 'open'
+        if ($user->isCustomer() && $ticket->user_id === $user->id && $ticket->status->value === 'open') {
             return true;
         }
 
@@ -104,7 +113,7 @@ class TicketPolicy
      */
     public function restore(User $user, Ticket $ticket): bool
     {
-        return $user->isAdmin() && $user->tokenCan('tickets:delete-any');
+        return $user->isAdmin() && $user->tokenCan(Abilities::DeleteAnyTicket);
     }
 
     /**
@@ -112,6 +121,6 @@ class TicketPolicy
      */
     public function forceDelete(User $user, Ticket $ticket): bool
     {
-        return $user->isAdmin() && $user->tokenCan('tickets:delete-any');
+        return $user->isAdmin() && $user->tokenCan(Abilities::DeleteAnyTicket);
     }
 }

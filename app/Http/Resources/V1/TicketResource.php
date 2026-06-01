@@ -14,7 +14,7 @@ class TicketResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $data = [
+        return [
             'id' => $this->id,
             'title' => $this->title,
             'description' => $this->description,
@@ -22,45 +22,11 @@ class TicketResource extends JsonResource
             'priority' => $this->priority,
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
+            
+            // Relationships - only included when loaded
+            'customer' => UserResource::make($this->whenLoaded('customer')),
+            'assigned_agent' => UserResource::make($this->whenLoaded('assignedAgent')),
+            'comments' => TicketCommentResource::collection($this->whenLoaded('comments')),
         ];
-
-        if ($this->relationLoaded('customer')) {
-            $data['customer'] = $this->shouldInclude('customer')
-                ? new UserResource($this->customer)
-                : [
-                    'id' => $this->customer->id,
-                    'name' => $this->customer->name,
-                    'email' => $this->customer->email,
-                ];
-        }
-
-        if ($this->assigned_to && $this->relationLoaded('assignedAgent')) {
-            $data['assigned_agent'] = $this->shouldInclude('assignedAgent')
-                ? new UserResource($this->assignedAgent)
-                : [
-                    'id' => $this->assignedAgent->id,
-                    'name' => $this->assignedAgent->name,
-                    'email' => $this->assignedAgent->email,
-                ];
-        } elseif ($this->assigned_to === null) {
-            $data['assigned_agent'] = null;
-        }
-
-        if ($this->shouldInclude('comments') && $this->relationLoaded('comments')) {
-            $data['comments'] = TicketCommentResource::collection($this->comments);
-        }
-
-        return $data;
-    }
-
-    /**
-     * Check if a relationship should be included based on the request.
-     */
-    private function shouldInclude(string $relationship): bool
-    {
-        $includes = request()->query('include', '');
-        $includesArray = array_filter(explode(',', $includes));
-
-        return in_array($relationship, $includesArray);
     }
 }
