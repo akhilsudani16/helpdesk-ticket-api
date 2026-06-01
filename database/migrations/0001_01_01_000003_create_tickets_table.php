@@ -1,5 +1,7 @@
 <?php
 
+use App\Enums\TicketPriority;
+use App\Enums\TicketStatus;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -17,8 +19,8 @@ return new class extends Migration
             $table->foreignId('assigned_to')->nullable()->constrained('users')->onDelete('set null');
             $table->string('title');
             $table->text('description');
-            $table->enum('status', ['open', 'in_progress', 'resolved', 'closed'])->default('open');
-            $table->enum('priority', ['low', 'medium', 'high', 'urgent'])->default('medium');
+            $table->enum('status', TicketStatus::cases());
+            $table->enum('priority', TicketPriority::cases());
             $table->softDeletes();
             $table->timestamps();
 

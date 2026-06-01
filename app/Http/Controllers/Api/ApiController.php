@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exceptions\InvalidQueryParameterException;
 use App\Http\Controllers\Controller;
 use App\Support\ApiResponse;
 use Illuminate\Http\Request;
@@ -65,26 +66,26 @@ abstract class ApiController extends Controller
 
     /**
      * Validate and get requested includes.
-     * 
+     *
      * @param array $allowedIncludes List of allowed include values
      * @return array Validated includes
-     * @throws \App\Exceptions\InvalidQueryParameterException
+     * @throws InvalidQueryParameterException
      */
     protected function validateIncludes(array $allowedIncludes): array
     {
         $includeParam = $this->request->query('include', '');
-        
+
         if (empty($includeParam)) {
             return [];
         }
 
         $requestedIncludes = array_filter(array_map('trim', explode(',', $includeParam)));
-        
+
         // Check for unsupported includes
         $unsupportedIncludes = array_diff($requestedIncludes, $allowedIncludes);
-        
+
         if (!empty($unsupportedIncludes)) {
-            throw new \App\Exceptions\InvalidQueryParameterException([
+            throw new InvalidQueryParameterException([
                 'include' => 'Unsupported include parameter: ' . implode(', ', $unsupportedIncludes) . '. Allowed: ' . implode(', ', $allowedIncludes),
             ], 'Unsupported include parameter.');
         }

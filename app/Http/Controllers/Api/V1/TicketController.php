@@ -20,7 +20,7 @@ use App\Support\Filters\TicketFilter;
  */
 class TicketController extends ApiController
 {
-    protected $policyClass = TicketPolicy::class;
+    protected string $policyClass = TicketPolicy::class;
 
     /**
      * List tickets
@@ -42,16 +42,17 @@ class TicketController extends ApiController
      */
     public function index(TicketFilter $filters)
     {
-        if (!$this->isAble('tickets.viewAny')) {
-            return $this->notAuthorized('You cannot view tickets');
-        }
-
         // Validate includes
         $allowedIncludes = ['customer', 'assignedAgent', 'comments'];
         $requestedIncludes = $this->validateIncludes($allowedIncludes);
 
         // Build query with conditional eager loading
         $query = Ticket::filter($filters);
+
+        $user = $this->request->user();
+        if ($user->isAgent()) {
+            $query->where('assigned_to', $user->id);
+        }
 
         // Conditionally eager load relationships to avoid N+1
         if (!empty($requestedIncludes)) {
@@ -70,7 +71,6 @@ class TicketController extends ApiController
 
         return TicketCollection::make($tickets);
     }
-
     /**
      * Create ticket
      *
@@ -99,10 +99,9 @@ class TicketController extends ApiController
             $data['user_id'] = $this->request->user()->id;
         }
 
-        $ticket = Ticket::create($data);
-        $ticket->load(['customer', 'assignedAgent']);
+        $ticket = Ticket::create($data)->load('customer', 'assignedAgent');
 
-        return $this->ok(new TicketResource($ticket), 'Ticket created successfully.', 201);
+        return $this->ok(new TicketResource($ticket), 'Ticket created successfully.', 200);
     }
 
     /**
@@ -114,6 +113,7 @@ class TicketController extends ApiController
      *
      * @urlParam ticket integer required The ticket ID. Example: 1
      * @queryParam include string Comma-separated relationships. Example: customer,comments
+     * @throws InvalidQueryParameterException
      */
     public function show(Ticket $ticket)
     {
@@ -206,12 +206,12 @@ class TicketController extends ApiController
      */
     public function destroy(Ticket $ticket)
     {
-        if (!$this->isAble('tickets.delete', $ticket)) {
-            return $this->notAuthorized('You cannot delete this ticket');
+        if ($this->isAble('tickets.delete', $ticket)) {
+            $ticket->delete();
+
+            return $this->ok('Ticket successfully deleted');
         }
 
-        $ticket->delete();
-
-        return $this->ok(null, 'Ticket deleted successfully.');
+        return $this->notAuthorized('You cannot delete this ticket');
     }
 }

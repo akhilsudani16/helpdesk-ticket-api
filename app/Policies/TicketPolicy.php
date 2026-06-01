@@ -21,10 +21,6 @@ class TicketPolicy
      */
     public function view(User $user, Ticket $ticket): bool
     {
-        if (!$user->tokenCan(Abilities::ViewTickets)) {
-            return false;
-        }
-
         // Admin can view all tickets
         if ($user->isAdmin()) {
             return true;
@@ -60,10 +56,6 @@ class TicketPolicy
      */
     public function update(User $user, Ticket $ticket): bool
     {
-        if (!$user->tokenCan(Abilities::UpdateTicket)) {
-            return false;
-        }
-
         // Admin can update any ticket
         if ($user->isAdmin() && $user->tokenCan(Abilities::UpdateAnyTicket)) {
             return true;
@@ -91,16 +83,12 @@ class TicketPolicy
      */
     public function delete(User $user, Ticket $ticket): bool
     {
-        if (!$user->tokenCan(Abilities::DeleteTicket)) {
-            return false;
-        }
-
         // Admin can delete any ticket
         if ($user->isAdmin() && $user->tokenCan(Abilities::DeleteAnyTicket)) {
             return true;
         }
 
-        // Customer can delete their own ticket only if status is 'open'
+        // Customer can delete their own ticket only if the status is 'open'
         if ($user->isCustomer() && $ticket->user_id === $user->id && $ticket->status->value === 'open') {
             return true;
         }

@@ -20,10 +20,6 @@ class UserPolicy
      */
     public function view(User $user, User $model): bool
     {
-        if (!$user->tokenCan(Abilities::ViewUsers)) {
-            return false;
-        }
-
         // Admin and agents can view users
         return $user->isAdmin() || $user->isAgent();
     }

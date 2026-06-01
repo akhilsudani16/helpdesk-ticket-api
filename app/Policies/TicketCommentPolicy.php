@@ -23,10 +23,6 @@ class TicketCommentPolicy
      */
     public function view(User $user, TicketComment $comment): bool
     {
-        if (!$user->tokenCan(Abilities::ViewComments)) {
-            return false;
-        }
-
         // Admin and agents can see all comments
         if ($user->isAdmin() || $user->isAgent()) {
             return true;
@@ -50,7 +46,7 @@ class TicketCommentPolicy
      */
     public function createInternal(User $user): bool
     {
-        return $user->tokenCan(Abilities::CreateInternalComment) && 
+        return $user->tokenCan(Abilities::CreateInternalComment) &&
                ($user->isAdmin() || $user->isAgent());
     }
 }

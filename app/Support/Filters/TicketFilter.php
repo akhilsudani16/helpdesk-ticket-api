@@ -24,7 +24,7 @@ class TicketFilter
     }
 
     /**
-     * Set allowed filters based on user role.
+     * Set allowed filters based on a user role.
      */
     private function setAllowedFilters(): void
     {
@@ -57,6 +57,7 @@ class TicketFilter
 
     /**
      * Apply filters and sorting to the query.
+     * @throws InvalidQueryParameterException
      */
     public function apply(Builder $query): Builder
     {
@@ -83,7 +84,7 @@ class TicketFilter
     private function validateAndApplyIncludes(Builder $query): void
     {
         $includeParam = $this->request->query('include', '');
-        
+
         if (empty($includeParam)) {
             // Default includes for list view
             $query->with(['customer', 'assignedAgent']);
@@ -92,27 +93,27 @@ class TicketFilter
 
         $allowedIncludes = ['customer', 'assignedAgent', 'comments'];
         $requestedIncludes = array_filter(array_map('trim', explode(',', $includeParam)));
-        
+
         // Check for unsupported includes
         $unsupportedIncludes = array_diff($requestedIncludes, $allowedIncludes);
-        
+
         if (!empty($unsupportedIncludes)) {
             throw new InvalidQueryParameterException([
                 'include' => 'Unsupported include parameter: ' . implode(', ', $unsupportedIncludes) . '. Allowed: ' . implode(', ', $allowedIncludes),
             ], 'Unsupported include parameter.');
         }
 
-        // Build relationships array
+        // Build relationship array
         $relationships = [];
-        
+
         if (in_array('customer', $requestedIncludes)) {
             $relationships[] = 'customer';
         }
-        
+
         if (in_array('assignedAgent', $requestedIncludes)) {
             $relationships[] = 'assignedAgent';
         }
-        
+
         if (in_array('comments', $requestedIncludes)) {
             $relationships[] = 'comments.user';
         }
@@ -162,7 +163,7 @@ class TicketFilter
         }
 
         $allowedSorts = ['created_at', 'updated_at', 'priority', 'status'];
-        
+
         // Support multiple sort fields separated by comma
         foreach (explode(',', $sortParam) as $sort) {
             $sort = trim($sort);
@@ -218,6 +219,7 @@ class TicketFilter
 
     /**
      * Filter by customer ID.
+     * @throws InvalidQueryParameterException
      */
     protected function customer_id(Builder $query, string $value): void
     {
@@ -227,6 +229,7 @@ class TicketFilter
 
     /**
      * Filter by customer ID alias.
+     * @throws InvalidQueryParameterException
      */
     protected function customer(Builder $query, string $value): void
     {
@@ -235,6 +238,7 @@ class TicketFilter
 
     /**
      * Filter by assigned agent.
+     * @throws InvalidQueryParameterException
      */
     protected function assigned_to(Builder $query, string $value): void
     {
@@ -244,6 +248,7 @@ class TicketFilter
 
     /**
      * Filter by assigned agent alias.
+     * @throws InvalidQueryParameterException
      */
     protected function assigned_agent(Builder $query, string $value): void
     {

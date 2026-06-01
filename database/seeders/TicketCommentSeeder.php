@@ -18,24 +18,24 @@ class TicketCommentSeeder extends Seeder
         $admin = User::where('role', UserRole::ADMIN)->first();
         $tickets = Ticket::all();
 
-        // જો કસ્ટમર ન મળે તો બેકઅપ માટે બધા કસ્ટમરનું લિસ્ટ
+
         $allCustomers = User::where('role', UserRole::CUSTOMER)->get();
 
         foreach ($tickets as $ticket) {
-            // પહેલા ટ્રાય કરો કે ટિકિટના રિલેશન પરથી કસ્ટમર મળી જાય
-            $customer = $ticket->user ?? $ticket->customer; 
-            
-            // જો ઉપરનાથી ન મળે તો $ticket->customer_id (અથવા user_id) થી શોધો
+
+            $customer = $ticket->user ?? $ticket->customer;
+
+
             if (!$customer) {
                 $customerId = $ticket->customer_id ?? $ticket->user_id;
                 $customer = User::find($customerId);
             }
 
-            // જો હજુ પણ કસ્ટમર null હોય, તો કોઈ રેન્ડમ કસ્ટમર લઈ લો
+
             if (!$customer) {
                 $customer = $allCustomers->random();
             }
-            
+
             $this->createCommentsForTicket($ticket, $customer, $agents, $admin);
         }
 
@@ -45,7 +45,7 @@ class TicketCommentSeeder extends Seeder
     private function createCommentsForTicket(Ticket $ticket, User $customer, $agents, User $admin): void
     {
         $commentCount = fake()->numberBetween(2, 6);
-        
+
         for ($i = 0; $i < $commentCount; $i++) {
             $author = $this->getCommentAuthor($customer, $agents, $admin, $i, $commentCount);
             $isInternal = ($author->isAgent() || $author->isAdmin()) && fake()->boolean(30);
@@ -84,9 +84,7 @@ class TicketCommentSeeder extends Seeder
             ]);
         }
 
-        // અહી આપણે ચેક કરીએ છીએ કે ઓથર કસ્ટમર છે કે કેમ.
-        // જો તમારી પાસે User મોડેલમાં isCustomer() ફંક્શન ન હોય, 
-        // તો $author->role === UserRole::CUSTOMER વાપરી શકો છો.
+
         if (method_exists($author, 'isCustomer') ? $author->isCustomer() : $author->role === UserRole::CUSTOMER) {
             if ($commentIndex === 0) {
                 return 'I am experiencing issues with ' . fake()->randomElement([

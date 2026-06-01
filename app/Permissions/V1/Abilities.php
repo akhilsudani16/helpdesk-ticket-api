@@ -25,7 +25,7 @@ final class Abilities
     public const ManageUsers = 'users:manage';
 
     /**
-     * Get abilities array for a user based on their role.
+     * Get the ability array for a user based on their role.
      *
      * @param User $user
      * @return array<int, string>

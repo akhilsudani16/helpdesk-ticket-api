@@ -2,7 +2,12 @@
 
 namespace App\Http\Requests\Api\V1;
 
+use App\Enums\TicketPriority;
+use App\Enums\TicketStatus;
+use App\Enums\UserRole;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class ReplaceTicketRequest extends FormRequest
 {
@@ -17,16 +22,22 @@ class ReplaceTicketRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array|string>
      */
     public function rules(): array
     {
         return [
             'title' => ['required', 'string', 'min:5', 'max:120'],
             'description' => ['required', 'string', 'min:20'],
-            'status' => ['required', 'in:open,in_progress,resolved,closed'],
-            'priority' => ['required', 'in:low,medium,high,urgent'],
-            'assigned_to' => ['nullable', 'exists:users,id'],
+            'status' => ['required', Rule::in(TicketStatus::values())],
+            'priority' => ['required', Rule::in(TicketPriority::values())],
+            'assigned_to' => [
+                'nullable',
+                Rule::exists('users', 'id')
+                    ->where(function ($query) {
+                        $query->where('role', UserRole::AGENT->value);
+                    })
+            ],
         ];
     }
 }

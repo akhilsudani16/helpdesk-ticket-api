@@ -37,8 +37,7 @@ Route::prefix('v1')->group(function () {
     });
 
     // Health check (public)
-    Route::get('/health', [HealthController::class, 'check'])
-        ->name('health.check');
+    Route::get('/health', [HealthController::class, 'check'])->name('health.check');
 });
 
 // Future API versions can be added here as separate prefix groups

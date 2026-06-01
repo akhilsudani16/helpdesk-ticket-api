@@ -2,7 +2,12 @@
 
 namespace App\Http\Requests\Api\V1;
 
+use App\Enums\TicketPriority;
+use App\Enums\TicketStatus;
+use App\Enums\UserRole;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateTicketRequest extends FormRequest
 {
@@ -17,7 +22,7 @@ class UpdateTicketRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array|string>
      */
     public function rules(): array
     {
@@ -29,9 +34,16 @@ class UpdateTicketRequest extends FormRequest
         ];
 
         if ($user && ($user->isAdmin() || $user->isAgent())) {
-            $rules['status'] = ['sometimes', 'in:open,in_progress,resolved,closed'];
-            $rules['priority'] = ['sometimes', 'in:low,medium,high,urgent'];
-            $rules['assigned_to'] = ['sometimes', 'nullable', 'exists:users,id'];
+            $rules['status'] = ['sometimes', Rule::in(TicketStatus::values())];
+            $rules['priority'] = ['sometimes', Rule::in(TicketPriority::values())];
+            $rules['assigned_to'] = [
+                'sometimes',
+                'nullable',
+                Rule::exists('users', 'id')
+                    ->where(function ($query) {
+                        $query->where('role', UserRole::AGENT->value);
+                    })
+            ];
         }
 
         return $rules;

@@ -33,11 +33,14 @@ class AuthTokenController extends ApiController
         }
 
         $abilities = Abilities::getAbilities($user);
-        
-        $fullToken = $user->createToken($request->device_name, $abilities)->plainTextToken;
+
+        $fullToken = $user->createToken($request->email, $abilities)->plainTextToken;
+
+        $parts = explode('|', $fullToken, 2);
+        $safeToken = $parts[1] ?? $fullToken;
 
         return $this->ok([
-            'token' => $fullToken,
+            'token' => $safeToken,
             'abilities' => $abilities,
         ], 'Token created successfully.');
     }
