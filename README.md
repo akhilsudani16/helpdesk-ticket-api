@@ -564,7 +564,3 @@ GET /api/v1/tickets?page=2&per_page=20
   }
 }
 ```
-
-## License
-
-This project is open-sourced software licensed under the MIT license.

@@ -20,9 +20,9 @@ class TicketResource extends JsonResource
             'description' => $this->description,
             'status' => $this->status,
             'priority' => $this->priority,
-            'created_at' => $this->created_at?->toISOString(),
-            'updated_at' => $this->updated_at?->toISOString(),
-            
+            'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
+            'updated_at' => $this->updated_at?->format('Y-m-d H:i:s'),
+
             // Relationships - only included when loaded
             'customer' => UserResource::make($this->whenLoaded('customer')),
             'assigned_agent' => UserResource::make($this->whenLoaded('assignedAgent')),

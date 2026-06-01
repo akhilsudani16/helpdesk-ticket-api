@@ -42,29 +42,12 @@ class TicketController extends ApiController
      */
     public function index(TicketFilter $filters)
     {
-        // Validate includes
-        $allowedIncludes = ['customer', 'assignedAgent', 'comments'];
-        $requestedIncludes = $this->validateIncludes($allowedIncludes);
-
-        // Build query with conditional eager loading
+        // Build query
         $query = Ticket::filter($filters);
 
         $user = $this->request->user();
         if ($user->isAgent()) {
             $query->where('assigned_to', $user->id);
-        }
-
-        // Conditionally eager load relationships to avoid N+1
-        if (!empty($requestedIncludes)) {
-            $eagerLoad = [];
-            foreach ($requestedIncludes as $include) {
-                if ($include === 'comments') {
-                    $eagerLoad[] = 'comments.user';
-                } else {
-                    $eagerLoad[] = $include;
-                }
-            }
-            $query->with($eagerLoad);
         }
 
         $tickets = $query->paginate($this->request->query('per_page', 15));

@@ -23,11 +23,11 @@ class TicketCommentSeeder extends Seeder
 
         foreach ($tickets as $ticket) {
 
-            $customer = $ticket->user ?? $ticket->customer;
+            $customer = $ticket->customer;
 
 
             if (!$customer) {
-                $customerId = $ticket->customer_id ?? $ticket->user_id;
+                $customerId = $ticket->customer_id;
                 $customer = User::find($customerId);
             }
 
