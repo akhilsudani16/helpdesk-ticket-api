@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Exceptions\InvalidQueryParameterException;
 use App\Http\Controllers\Api\ApiController;
 use App\Http\Requests\Api\V1\ReplaceTicketRequest;
 use App\Http\Requests\Api\V1\StoreTicketRequest;
@@ -14,7 +15,7 @@ use App\Support\Filters\TicketFilter;
 
 /**
  * @group Tickets
- * 
+ *
  * APIs for managing support tickets
  */
 class TicketController extends ApiController
@@ -23,11 +24,11 @@ class TicketController extends ApiController
 
     /**
      * List tickets
-     * 
+     *
      * Get a paginated list of tickets with optional filtering and sorting.
-     * 
+     *
      * @authenticated
-     * 
+     *
      * @queryParam include string Comma-separated list of relationships to include. Example: customer,comments
      * @queryParam filter[status] string Filter by status. Example: open
      * @queryParam filter[priority] string Filter by priority. Example: high
@@ -37,6 +38,7 @@ class TicketController extends ApiController
      * @queryParam sort string Sort by field. Prefix with - for descending. Example: -created_at
      * @queryParam page integer Page number. Example: 1
      * @queryParam per_page integer Items per page. Example: 15
+     * @throws InvalidQueryParameterException
      */
     public function index(TicketFilter $filters)
     {
@@ -71,11 +73,11 @@ class TicketController extends ApiController
 
     /**
      * Create ticket
-     * 
+     *
      * Create a new support ticket.
-     * 
+     *
      * @authenticated
-     * 
+     *
      * @bodyParam title string required Ticket title. Example: Payment failed
      * @bodyParam description string required Ticket description. Example: I paid but account not upgraded.
      * @bodyParam priority string required Priority level. Example: high
@@ -105,11 +107,11 @@ class TicketController extends ApiController
 
     /**
      * Show ticket
-     * 
+     *
      * Get details of a specific ticket.
-     * 
+     *
      * @authenticated
-     * 
+     *
      * @urlParam ticket integer required The ticket ID. Example: 1
      * @queryParam include string Comma-separated relationships. Example: customer,comments
      */
@@ -125,7 +127,7 @@ class TicketController extends ApiController
 
         // Always load customer and assignedAgent for single ticket view
         $defaultRelations = ['customer', 'assignedAgent'];
-        
+
         // Add comments if requested
         if (in_array('comments', $requestedIncludes)) {
             $defaultRelations[] = 'comments.user';
@@ -139,11 +141,11 @@ class TicketController extends ApiController
 
     /**
      * Update ticket (PATCH)
-     * 
+     *
      * Partially update a ticket.
-     * 
+     *
      * @authenticated
-     * 
+     *
      * @urlParam ticket integer required The ticket ID. Example: 1
      * @bodyParam title string Ticket title. Example: Updated title
      * @bodyParam description string Ticket description. Example: Updated description
@@ -165,11 +167,11 @@ class TicketController extends ApiController
 
     /**
      * Replace ticket (PUT)
-     * 
+     *
      * Fully replace a ticket. All fields are required.
-     * 
+     *
      * @authenticated
-     * 
+     *
      * @urlParam ticket integer required The ticket ID. Example: 1
      * @bodyParam title string required Ticket title. Example: Payment failed
      * @bodyParam description string required Ticket description. Example: Full description
@@ -195,11 +197,11 @@ class TicketController extends ApiController
 
     /**
      * Delete ticket
-     * 
+     *
      * Delete a ticket.
-     * 
+     *
      * @authenticated
-     * 
+     *
      * @urlParam ticket integer required The ticket ID. Example: 1
      */
     public function destroy(Ticket $ticket)
