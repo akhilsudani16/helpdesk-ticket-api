@@ -29,25 +29,4 @@ enum TicketStatus: string
             self::CLOSED => 'Closed',
         };
     }
-
-    /**
-     * Get status color for UI.
-     */
-    public function color(): string
-    {
-        return match ($this) {
-            self::OPEN => 'blue',
-            self::IN_PROGRESS => 'yellow',
-            self::RESOLVED => 'green',
-            self::CLOSED => 'gray',
-        };
-    }
-
-    /**
-     * Check if ticket can be deleted by customer.
-     */
-    public function canBeDeletedByCustomer(): bool
-    {
-        return $this === self::OPEN;
-    }
 }

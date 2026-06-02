@@ -28,18 +28,6 @@ abstract class ApiController extends Controller
     }
 
     /**
-     * Check if the current user has an ability (via Gate or Sanctum).
-     */
-    protected function isAble(string $ability, $resource = null): bool
-    {
-        if ($resource) {
-            return Gate::allows($ability, $resource);
-        }
-
-        return Gate::allows($ability);
-    }
-
-    /**
      * Return a forbidden/unauthorized response.
      */
     protected function notAuthorized(string $message = 'Unauthorized')
@@ -55,13 +43,9 @@ abstract class ApiController extends Controller
         return ApiResponse::success($data, $message, $code);
     }
 
-    /**
-     * Check if a relationship should be included based on query parameter.
-     */
-    protected function include(string $relationship): bool
+    protected function error($data = null, string $message = 'Error', int $code = 404)
     {
-        $includes = array_filter(explode(',', $this->request->query('include', '')));
-        return in_array($relationship, $includes);
+        return ApiResponse::error($data, $message, $code);
     }
 
     /**

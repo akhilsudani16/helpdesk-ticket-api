@@ -61,9 +61,8 @@ class TicketFilter
      */
     public function apply(Builder $query): Builder
     {
-        if ($this->user->isCustomer()) {
-            $query->where('user_id', $this->user->id);
-        }
+        // Apply role-based scoping
+        $this->applyRoleScope($query);
 
         // Validate and apply includes
         $this->validateAndApplyIncludes($query);
@@ -76,6 +75,21 @@ class TicketFilter
         $this->applySort($query);
 
         return $query;
+    }
+
+    /**
+     * Apply role-based query scoping.
+     */
+    private function applyRoleScope(Builder $query): void
+    {
+        if ($this->user->isCustomer()) {
+            // Customers can only see their own tickets
+            $query->where('user_id', $this->user->id);
+        } elseif ($this->user->isAgent()) {
+            // Agents can only see tickets assigned to them
+            $query->where('assigned_to', $this->user->id);
+        }
+        // Admins can see all tickets
     }
 
     /**
@@ -99,8 +113,8 @@ class TicketFilter
 
         if (!empty($unsupportedIncludes)) {
             throw new InvalidQueryParameterException([
-                'include' => 'Unsupported include parameter: ' . implode(', ', $unsupportedIncludes) . '. Allowed: ' . implode(', ', $allowedIncludes),
-            ], 'Unsupported include parameter.');
+                'include' => __('validation.unsupported_include') . implode(', ', $unsupportedIncludes) . __('validation.allowed') . implode(', ', $allowedIncludes),
+            ], __('validation.unsupported_include'));
         }
 
         // Build relationship array
@@ -125,15 +139,6 @@ class TicketFilter
     }
 
     /**
-     * Determine whether comments should be included.
-     * @deprecated Use validateAndApplyIncludes instead
-     */
-    private function includesComments(): bool
-    {
-        return str_contains($this->request->query('include', ''), 'comments');
-    }
-
-    /**
      * Apply filter conditions.
      */
     private function applyFilters(Builder $query, array $filters): void
@@ -141,7 +146,7 @@ class TicketFilter
         $unsupportedFilters = array_diff(array_keys($filters), $this->allowedFilters);
         if (!empty($unsupportedFilters)) {
             throw new InvalidQueryParameterException([
-                'filter' => 'Unsupported filter(s): ' . implode(', ', $unsupportedFilters),
+                'filter' => __('validation.unsupported_filter') . implode(', ', $unsupportedFilters),
             ]);
         }
 
@@ -164,7 +169,7 @@ class TicketFilter
 
         $allowedSorts = ['created_at', 'updated_at', 'priority', 'status'];
 
-        // Support multiple sort fields separated by comma
+        // Support multiple sort fields separated by a comma
         foreach (explode(',', $sortParam) as $sort) {
             $sort = trim($sort);
             if (empty($sort)) {

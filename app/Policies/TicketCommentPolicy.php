@@ -6,6 +6,7 @@ use App\Models\Ticket;
 use App\Models\TicketComment;
 use App\Models\User;
 use App\Permissions\V1\Abilities;
+use Illuminate\Auth\Access\AuthorizationException;
 
 class TicketCommentPolicy
 {
@@ -15,7 +16,13 @@ class TicketCommentPolicy
     public function viewAny(User $user, Ticket $ticket): bool
     {
         // User must be able to view the ticket to view its comments
-        return $user->tokenCan(Abilities::ViewComments) && $user->can('view', $ticket);
+        if ($user->tokenCan(Abilities::ViewComments) && $user->can('view', $ticket)) {
+            return true;
+        }
+
+        throw new AuthorizationException(
+            __('validation.ticket_view_comment_permission_denied')
+        );
     }
 
     /**
@@ -29,7 +36,13 @@ class TicketCommentPolicy
         }
 
         // Customers can only see public comments
-        return !$comment->is_internal;
+        if (!$comment->is_internal) {
+            return true;
+        }
+
+        throw new AuthorizationException(
+            __('validation.internal_comment_permission_denied')
+        );
     }
 
     /**
@@ -38,7 +51,13 @@ class TicketCommentPolicy
     public function create(User $user, Ticket $ticket): bool
     {
         // User must be able to view the ticket to comment on it
-        return $user->tokenCan(Abilities::CreateComment) && $user->can('view', $ticket);
+        if ($user->tokenCan(Abilities::CreateComment) && $user->can('view', $ticket)) {
+            return true;
+        }
+
+        throw new AuthorizationException(
+            __('validation.ticket_comment_create_permission_denied')
+        );
     }
 
     /**
@@ -46,7 +65,32 @@ class TicketCommentPolicy
      */
     public function createInternal(User $user): bool
     {
-        return $user->tokenCan(Abilities::CreateInternalComment) &&
-               ($user->isAdmin() || $user->isAgent());
+        if ($user->tokenCan(Abilities::CreateInternalComment) && ($user->isAdmin() || $user->isAgent())) {
+            return true;
+        }
+
+        throw new AuthorizationException(
+            __('validation.internal_comment_create_permission_denied')
+        );
+    }
+
+    /**
+     * Determine if the user can delete the comment.
+     */
+    public function delete(User $user, TicketComment $comment): bool
+    {
+        // Admin can delete any comment
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        // Users can delete their own comments
+        if ($comment->user_id === $user->id) {
+            return true;
+        }
+
+        throw new AuthorizationException(
+            __('validation.comment_delete_permission_denied')
+        );
     }
 }

@@ -15,7 +15,7 @@ class ApiResponse
         int $statusCode = 200
     ): JsonResponse {
         $response = [
-            'status' => 'success',
+            'status' => $statusCode,
             'message' => $message,
         ];
 
@@ -35,7 +35,7 @@ class ApiResponse
         int $statusCode = 400
     ): JsonResponse {
         $response = [
-            'status' => 'error',
+            'status' => $statusCode,
             'message' => $message,
         ];
 
@@ -93,7 +93,7 @@ class ApiResponse
     }
 
     /**
-     * Return a no content response.
+     * Return a no-content response.
      */
     public static function noContent(): JsonResponse
     {

@@ -4,7 +4,7 @@ Base URL: **http://localhost:8000**
 
 ---
 
-## 🔐 Authentication
+## Authentication
 
 ### 1. Login (Create Token)
 ```
@@ -25,7 +25,7 @@ Content-Type: application/json
   "message": "Token created successfully.",
   "data": {
     "token": "1|abc123...",
-    "abilities": ["tickets:view", "tickets:create", ...]
+    "abilities": ["tickets:view", "tickets:create", "..."]
   }
 }
 ```
@@ -38,7 +38,7 @@ Authorization: Bearer {your_token}
 
 ---
 
-## 🎫 Tickets
+## Tickets
 
 ### 3. List All Tickets
 ```
@@ -119,7 +119,7 @@ GET http://localhost:8000/api/v1/tickets/1?include=customer,comments
 Authorization: Bearer {your_token}
 ```
 
-### 12. Update Ticket (PATCH - Partial Update)
+### 12. Update Ticket (PATCH – Partial Update)
 ```
 PATCH http://localhost:8000/api/v1/tickets/1
 Authorization: Bearer {your_token}
@@ -141,7 +141,7 @@ Content-Type: application/json
 }
 ```
 
-### 13. Replace Ticket (PUT - Full Replacement)
+### 13. Replace Ticket (PUT – Full Replacement)
 ```
 PUT http://localhost:8000/api/v1/tickets/1
 Authorization: Bearer {your_token}
@@ -164,7 +164,7 @@ Authorization: Bearer {your_token}
 
 ---
 
-## 💬 Ticket Comments
+##  Ticket Comments
 
 ### 15. List Ticket Comments
 ```
@@ -197,7 +197,7 @@ Content-Type: application/json
 
 ---
 
-## 👥 Users (Admin/Agent Only)
+##  Users (Admin/Agent Only)
 
 ### 18. List All Users
 ```
@@ -213,7 +213,7 @@ Authorization: Bearer {your_token}
 
 ---
 
-## 🏥 Health Check
+##  Health Check
 
 ### 20. API Health Check
 ```
@@ -230,7 +230,7 @@ GET http://localhost:8000/api/v1/health
 
 ---
 
-## 📝 Test User Credentials
+##  Test User Credentials
 
 | Role | Email | Password | Use Case |
 |------|-------|----------|----------|
@@ -245,7 +245,7 @@ GET http://localhost:8000/api/v1/health
 
 ---
 
-## 🔑 Quick Start Guide
+##  Quick Start Guide
 
 ### Step 1: Login
 ```bash
@@ -269,7 +269,7 @@ curl -X GET http://localhost:8000/api/v1/tickets \
 
 ---
 
-## 📊 Response Formats
+## Response Formats
 
 ### Success Response
 ```json
@@ -335,7 +335,7 @@ curl -X GET http://localhost:8000/api/v1/tickets \
 
 ---
 
-## 🚦 Rate Limits
+##  Rate Limits
 
 - **Authentication endpoints**: 5 requests per minute per IP
 - **API endpoints**: 60 requests per minute per user
@@ -349,7 +349,7 @@ Retry-After: 60 (when limit exceeded)
 
 ---
 
-## 🧪 Testing Examples
+## Testing Examples
 
 ### Example 1: Create and Update a Ticket
 ```bash
@@ -388,7 +388,7 @@ curl -X POST http://localhost:8000/api/v1/tickets/1/comments \
 
 ---
 
-## 📚 Additional Resources
+## Additional Resources
 
 - **Interactive API Documentation**: http://localhost:8000/docs
 - **OpenAPI Specification**: `storage/app/private/scribe/openapi.yaml`
@@ -396,7 +396,7 @@ curl -X POST http://localhost:8000/api/v1/tickets/1/comments \
 
 ---
 
-## ⚠️ Important Notes
+##  Important Notes
 
 1. **All API requests must include `Content-Type: application/json` header** (except GET requests)
 2. **Protected endpoints require `Authorization: Bearer {token}` header**
@@ -411,7 +411,7 @@ curl -X POST http://localhost:8000/api/v1/tickets/1/comments \
 
 ---
 
-## 🐛 Common Errors and Solutions
+## Common Errors and Solutions
 
 ### Error: "Unauthenticated"
 **Solution**: Make sure you're including the `Authorization: Bearer {token}` header
@@ -436,7 +436,7 @@ curl -X POST http://localhost:8000/api/v1/tickets/1/comments \
 
 ---
 
-## 🎯 Quick Reference
+##  Quick Reference
 
 | Method | Endpoint | Auth Required | Description |
 |--------|----------|---------------|-------------|

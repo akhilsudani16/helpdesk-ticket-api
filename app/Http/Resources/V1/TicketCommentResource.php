@@ -14,14 +14,11 @@ class TicketCommentResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $user = $request->user();
-
         return [
             'id' => $this->id,
             'body' => $this->body,
             'is_internal' => $this->is_internal,
-
-            // User relationship - only included when loaded
+            'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
             'user' => UserResource::make($this->whenLoaded('user')),
         ];
     }

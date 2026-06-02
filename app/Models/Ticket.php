@@ -20,6 +20,15 @@ class Ticket extends Model
     /** @use HasFactory<TicketFactory> */
     use HasFactory, SoftDeletes;
 
+    /**
+     * The model's default attribute values.
+     *
+     * @var array
+     */
+    protected $attributes = [
+        'status' => 'open',
+    ];
+
     protected function casts(): array
     {
         return [

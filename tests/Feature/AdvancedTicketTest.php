@@ -94,6 +94,8 @@ test('PUT request with all fields succeeds', function () {
     $customer = User::factory()->customer()->create();
     $ticket = Ticket::factory()->create(['user_id' => $customer->id]);
     
+    $agent = User::factory()->agent()->create();
+    
     $token = $admin->createToken('Test', [
         Abilities::ViewTickets,
         Abilities::UpdateTicket,
@@ -106,7 +108,7 @@ test('PUT request with all fields succeeds', function () {
             'description' => 'This is a complete replacement description that is long enough.',
             'status' => 'in_progress',
             'priority' => 'urgent',
-            'assigned_to' => $admin->id,
+            'assigned_to' => $agent->id,
         ]);
 
     $response->assertStatus(200);
@@ -115,6 +117,7 @@ test('PUT request with all fields succeeds', function () {
     expect($ticket->title)->toBe('Complete Replacement Title');
     expect($ticket->status->value)->toBe('in_progress');
     expect($ticket->priority->value)->toBe('urgent');
+    expect($ticket->assigned_to)->toBe($agent->id);
 });
 
 // Test 4: Customer cannot use PUT

@@ -66,21 +66,7 @@ endpoints:
       password: password
       device_name: Postman
     fileParameters: []
-    responses:
-      -
-        custom: []
-        status: 200
-        content: |-
-          {
-            "status": "success",
-            "message": "Token created successfully.",
-            "data": {
-              "token": "1|abc123...",
-              "abilities": ["tickets:view", "tickets:create"]
-            }
-          }
-        headers: []
-        description: ''
+    responses: []
     responseFields: []
     auth: []
     controller: null
@@ -113,17 +99,7 @@ endpoints:
     bodyParameters: []
     cleanBodyParameters: []
     fileParameters: []
-    responses:
-      -
-        custom: []
-        status: 200
-        content: |-
-          {
-            "status": "success",
-            "message": "Token revoked successfully."
-          }
-        headers: []
-        description: ''
+    responses: []
     responseFields: []
     auth: []
     controller: null

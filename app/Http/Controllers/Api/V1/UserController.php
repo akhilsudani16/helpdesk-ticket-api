@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Api\ApiController;
 use App\Http\Resources\V1\UserResource;
 use App\Models\User;
+use Illuminate\Support\Facades\Gate;
 
 /**
  * @group Users
@@ -22,9 +23,7 @@ class UserController extends ApiController
      */
     public function index()
     {
-        if (!$this->isAble('users.viewAny')) {
-            return $this->notAuthorized('You cannot view users');
-        }
+        Gate::authorize('viewAny', User::class);
 
         $users = User::paginate(15);
 
@@ -42,9 +41,7 @@ class UserController extends ApiController
      */
     public function show(User $user)
     {
-        if (!$this->isAble('users.view', $user)) {
-            return $this->notAuthorized('You cannot view this user');
-        }
+        Gate::authorize('view', $user);
 
         return $this->ok(new UserResource($user));
     }

@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\User;
 use App\Permissions\V1\Abilities;
+use Illuminate\Auth\Access\AuthorizationException;
 
 class UserPolicy
 {
@@ -12,7 +13,13 @@ class UserPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->tokenCan(Abilities::ViewUsers) && ($user->isAdmin() || $user->isAgent());
+        if ($user->tokenCan(Abilities::ViewUsers) && ($user->isAdmin() || $user->isAgent())) {
+            return true;
+        }
+
+        throw new AuthorizationException(
+            __('validation.user_view_permission_denied')
+        );
     }
 
     /**
@@ -21,7 +28,15 @@ class UserPolicy
     public function view(User $user, User $model): bool
     {
         // Admin and agents can view users
-        return $user->isAdmin() || $user->isAgent();
+        if ($user->isAdmin() || $user->isAgent()) {
+            return true;
+        }
+
+        if($user->isCustomer() )
+
+        throw new AuthorizationException(
+            __('validation.user_view_permission_denied')
+        );
     }
 
     /**

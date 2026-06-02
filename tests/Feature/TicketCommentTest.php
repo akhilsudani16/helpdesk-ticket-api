@@ -42,15 +42,17 @@ test('customer cannot create internal comment', function () {
             'is_internal' => true,
         ]);
 
-    // The is_internal field is stripped out for customers, so the comment is created as public
-    $response->assertStatus(201);
+    // Customers attempting to create internal comments should get validation error
+    $response->assertStatus(422)
+        ->assertJson([
+            'status' => 'error',
+            'message' => 'Validation failed.',
+        ]);
     
-    // Verify the comment was created as public (not internal)
-    $this->assertDatabaseHas('ticket_comments', [
+    // Verify no comment was created
+    $this->assertDatabaseMissing('ticket_comments', [
         'ticket_id' => $ticket->id,
-        'user_id' => $customer->id,
         'body' => 'This is a test comment.',
-        'is_internal' => false, // Should be false, not true
     ]);
 });
 

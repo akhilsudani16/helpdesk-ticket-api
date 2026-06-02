@@ -22,40 +22,33 @@ class StoreTicketCommentRequest extends FormRequest
      */
     public function rules(): array
     {
+        $user = $this->user();
+
         return [
             'body' => ['required', 'string', 'min:3', 'max:2000'],
-            'is_internal' => ['sometimes', 'boolean'],
+            'is_internal' => [
+                'sometimes',
+                'boolean',
+                function ($attribute, $value, $fail) use ($user) {
+                    // If customer tries to set is_internal to true, reject it
+                    if ($user && $user->isCustomer() && $value === true) {
+                        $fail( __('validation.customer_not_allow_internal_comment'));
+                    }
+                },
+            ],
         ];
     }
 
     /**
-     * Get validated data with forbidden fields removed.
+     * Custom validation messages.
      */
-    public function validated($key = null, $default = null)
+    public function messages(): array
     {
-        $validated = parent::validated($key, $default);
-        $user = $this->user();
-
-        // Remove is_internal for customers
-        if ($user && $user->isCustomer()) {
-            unset($validated['is_internal']);
-        }
-
-        return $validated;
-    }
-
-    /**
-     * Prepare the data for validation.
-     */
-    protected function prepareForValidation(): void
-    {
-        $user = $this->user();
-
-        // Remove is_internal field for customers
-        if ($user && $user->isCustomer()) {
-            $input = $this->all();
-            unset($input['is_internal']);
-            $this->replace($input);
-        }
+        return [
+            'body.required' => __('validation.body_is_required'),
+            'body.min' => __('validation.comment_body_min'),
+            'body.max' => __('validation.comment_body_max'),
+            'is_internal.boolean' => __('validation.is_internal_must_be_boolean'),
+        ];
     }
 }

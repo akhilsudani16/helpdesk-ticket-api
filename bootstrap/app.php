@@ -44,7 +44,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 if ($e instanceof AuthorizationException) {
                     return response()->json([
                         'status' => 'error',
-                        'message' => 'This action is forbidden.',
+                        'message' => $e->getMessage() ?: 'This action is forbidden.',
                     ], 403);
                 }
 

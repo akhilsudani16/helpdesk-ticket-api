@@ -12,6 +12,7 @@ use App\Http\Resources\V1\TicketResource;
 use App\Models\Ticket;
 use App\Policies\TicketPolicy;
 use App\Support\Filters\TicketFilter;
+use Illuminate\Support\Facades\Gate;
 
 /**
  * @group Tickets
@@ -42,17 +43,12 @@ class TicketController extends ApiController
      */
     public function index(TicketFilter $filters)
     {
-        // Build query
-        $query = Ticket::filter($filters);
+        Gate::authorize('viewAny', Ticket::class);
 
-        $user = $this->request->user();
-        if ($user->isAgent()) {
-            $query->where('assigned_to', $user->id);
-        }
+        $tickets = Ticket::filter($filters)
+            ->paginate($this->request->query('per_page', 15));
 
-        $tickets = $query->paginate($this->request->query('per_page', 15));
-
-        return TicketCollection::make($tickets);
+        return $this->ok(TicketCollection::make($tickets, __('validation.ticket_found')));
     }
     /**
      * Create ticket
@@ -66,25 +62,19 @@ class TicketController extends ApiController
      * @bodyParam priority string required Priority level. Example: high
      * @bodyParam user_id integer User ID (admin only). Example: 5
      */
+
     public function store(StoreTicketRequest $request)
     {
-        if (!$this->isAble('tickets.create')) {
-            return $this->notAuthorized('You cannot create tickets');
-        }
+        Gate::authorize('create', Ticket::class);
 
         $data = $request->validated();
 
-        if (isset($data['user_id']) && !$this->isAble('tickets.createAny')) {
-            return $this->notAuthorized('You cannot create tickets for other users');
-        }
-
-        if (!isset($data['user_id'])) {
-            $data['user_id'] = $this->request->user()->id;
-        }
+        // Set user_id to current user if not provided
+        $data['user_id'] = $data['user_id'] ?? $request->user()->id;
 
         $ticket = Ticket::create($data)->load('customer', 'assignedAgent');
 
-        return $this->ok(new TicketResource($ticket), 'Ticket created successfully.', 200);
+        return $this->ok(new TicketResource($ticket), __('validation.ticket_create'), 201);
     }
 
     /**
@@ -100,24 +90,20 @@ class TicketController extends ApiController
      */
     public function show(Ticket $ticket)
     {
-        if (!$this->isAble('tickets.view', $ticket)) {
-            return $this->notAuthorized('You cannot view this ticket');
-        }
+        Gate::authorize('view', $ticket);
 
-        // Validate includes
+        // Validate and apply includes
         $allowedIncludes = ['customer', 'assignedAgent', 'comments'];
         $requestedIncludes = $this->validateIncludes($allowedIncludes);
 
-        // Always load customer and assignedAgent for single ticket view
-        $defaultRelations = ['customer', 'assignedAgent'];
+        // Build relationships to load
+        $relations = ['customer', 'assignedAgent'];
 
-        // Add comments if requested
         if (in_array('comments', $requestedIncludes)) {
-            $defaultRelations[] = 'comments.user';
+            $relations[] = 'comments.user';
         }
 
-        // Eager load relationships
-        $ticket->loadMissing($defaultRelations);
+        $ticket->loadMissing($relations);
 
         return $this->ok(new TicketResource($ticket));
     }
@@ -138,14 +124,12 @@ class TicketController extends ApiController
      */
     public function patch(UpdateTicketRequest $request, Ticket $ticket)
     {
-        if (!$this->isAble('tickets.update', $ticket)) {
-            return $this->notAuthorized('You cannot update this ticket');
-        }
+        Gate::authorize('update', $ticket);
 
         $ticket->update($request->validated());
         $ticket->load(['customer', 'assignedAgent']);
 
-        return $this->ok(new TicketResource($ticket), 'Ticket updated successfully.');
+        return $this->ok(new TicketResource($ticket), __('validation.ticket_update'));
     }
 
     /**
@@ -164,18 +148,16 @@ class TicketController extends ApiController
      */
     public function update(ReplaceTicketRequest $request, Ticket $ticket)
     {
-        if (!$this->isAble('tickets.update', $ticket)) {
-            return $this->notAuthorized('You cannot update this ticket');
-        }
+        Gate::authorize('update', $ticket);
 
         if ($this->request->user()->isCustomer()) {
-            return $this->notAuthorized('Customers must use PATCH for partial updates.');
+            return $this->notAuthorized( __('validation.ticket_user_update') );
         }
 
         $ticket->update($request->validated());
         $ticket->load(['customer', 'assignedAgent']);
 
-        return $this->ok(new TicketResource($ticket), 'Ticket replaced successfully.');
+        return $this->ok(new TicketResource($ticket), __('validation.ticket_replaced'));
     }
 
     /**
@@ -189,12 +171,10 @@ class TicketController extends ApiController
      */
     public function destroy(Ticket $ticket)
     {
-        if ($this->isAble('tickets.delete', $ticket)) {
-            $ticket->delete();
+        Gate::authorize('delete', $ticket);
 
-            return $this->ok('Ticket successfully deleted');
-        }
+        $ticket->delete();
 
-        return $this->notAuthorized('You cannot delete this ticket');
+        return $this->ok(null, __('validation.ticket_deleted'));
     }
 }

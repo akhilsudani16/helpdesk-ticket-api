@@ -125,7 +125,7 @@ endpoints:
       body:
         custom: []
         name: body
-        description: 'Comment text (3-2000 characters).'
+        description: 'Comment text.'
         required: true
         example: 'This issue has been resolved.'
         type: string
@@ -136,7 +136,7 @@ endpoints:
       is_internal:
         custom: []
         name: is_internal
-        description: 'Whether the comment is internal (admin/agent only).'
+        description: 'Whether the comment is internal.'
         required: false
         example: false
         type: boolean
@@ -147,6 +147,87 @@ endpoints:
     cleanBodyParameters:
       body: 'This issue has been resolved.'
       is_internal: false
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - DELETE
+    uri: 'api/v1/tickets/{ticket_id}/comments/{comment_id}'
+    metadata:
+      custom: []
+      groupName: 'Ticket Comments'
+      groupDescription: |-
+
+        APIs for managing ticket comments
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Delete ticket comment'
+      description: 'Delete a comment from a ticket.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      ticket_id:
+        custom: []
+        name: ticket_id
+        description: 'The ID of the ticket.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      comment_id:
+        custom: []
+        name: comment_id
+        description: 'The ID of the comment.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      ticket:
+        custom: []
+        name: ticket
+        description: 'The ticket ID.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      comment:
+        custom: []
+        name: comment
+        description: 'The comment ID.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      ticket_id: 1
+      comment_id: 1
+      ticket: 1
+      comment: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
     fileParameters: []
     responses: []
     responseFields: []

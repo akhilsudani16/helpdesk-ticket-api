@@ -19,8 +19,8 @@ return new class extends Migration
             $table->foreignId('assigned_to')->nullable()->constrained('users')->onDelete('set null');
             $table->string('title');
             $table->text('description');
-            $table->enum('status', TicketStatus::cases());
-            $table->enum('priority', TicketPriority::cases());
+            $table->enum('status', TicketStatus::values());
+            $table->enum('priority', TicketPriority::values());
             $table->softDeletes();
             $table->timestamps();
         });

@@ -31,7 +31,7 @@ endpoints:
       include:
         custom: []
         name: include
-        description: 'Comma-separated list of relationships to include (customer,assignedAgent,comments).'
+        description: 'Comma-separated list of relationships to include.'
         required: false
         example: 'customer,comments'
         type: string
@@ -97,7 +97,7 @@ endpoints:
       sort:
         custom: []
         name: sort
-        description: 'Sort by field(s). Prefix with - for descending.'
+        description: 'Sort by field. Prefix with - for descending.'
         required: false
         example: '-created_at'
         type: string
@@ -183,7 +183,7 @@ endpoints:
       title:
         custom: []
         name: title
-        description: 'Ticket title (5-120 characters).'
+        description: 'Ticket title.'
         required: true
         example: 'Payment failed'
         type: string
@@ -194,9 +194,9 @@ endpoints:
       description:
         custom: []
         name: description
-        description: 'Ticket description (min 20 characters).'
+        description: 'Ticket description.'
         required: true
-        example: 'I paid for the plan, but my account is not upgraded.'
+        example: 'I paid but account not upgraded.'
         type: string
         enumValues: []
         exampleWasSpecified: true
@@ -226,7 +226,7 @@ endpoints:
         deprecated: false
     cleanBodyParameters:
       title: 'Payment failed'
-      description: 'I paid for the plan, but my account is not upgraded.'
+      description: 'I paid but account not upgraded.'
       priority: high
       user_id: 5
     fileParameters: []
@@ -286,7 +286,7 @@ endpoints:
       include:
         custom: []
         name: include
-        description: 'Comma-separated list of relationships to include.'
+        description: 'Comma-separated relationships.'
         required: false
         example: 'customer,comments'
         type: string
@@ -366,7 +366,7 @@ endpoints:
       title:
         custom: []
         name: title
-        description: 'Ticket title (5-120 characters).'
+        description: 'Ticket title.'
         required: true
         example: 'Payment failed'
         type: string
@@ -377,7 +377,7 @@ endpoints:
       description:
         custom: []
         name: description
-        description: 'Ticket description (min 20 characters).'
+        description: 'Ticket description.'
         required: true
         example: 'Full description'
         type: string
@@ -445,7 +445,7 @@ endpoints:
       subgroup: ''
       subgroupDescription: ''
       title: 'Update ticket (PATCH)'
-      description: 'Partially update a ticket. Only provided fields will be updated.'
+      description: 'Partially update a ticket.'
       authenticated: true
       deprecated: false
     headers:
@@ -483,9 +483,9 @@ endpoints:
       title:
         custom: []
         name: title
-        description: 'Ticket title (5-120 characters).'
+        description: 'Ticket title.'
         required: false
-        example: 'Payment issue resolved'
+        example: 'Updated title'
         type: string
         enumValues: []
         exampleWasSpecified: true
@@ -494,7 +494,7 @@ endpoints:
       description:
         custom: []
         name: description
-        description: 'Ticket description (min 20 characters).'
+        description: 'Ticket description.'
         required: false
         example: 'Updated description'
         type: string
@@ -505,7 +505,7 @@ endpoints:
       status:
         custom: []
         name: status
-        description: 'Status (admin/agent only).'
+        description: Status.
         required: false
         example: in_progress
         type: string
@@ -516,7 +516,7 @@ endpoints:
       priority:
         custom: []
         name: priority
-        description: 'Priority (admin/agent only).'
+        description: Priority.
         required: false
         example: medium
         type: string
@@ -527,7 +527,7 @@ endpoints:
       assigned_to:
         custom: []
         name: assigned_to
-        description: 'Assigned agent ID (admin/agent only).'
+        description: 'Assigned agent ID.'
         required: false
         example: 2
         type: integer
@@ -536,7 +536,7 @@ endpoints:
         nullable: false
         deprecated: false
     cleanBodyParameters:
-      title: 'Payment issue resolved'
+      title: 'Updated title'
       description: 'Updated description'
       status: in_progress
       priority: medium
@@ -562,7 +562,7 @@ endpoints:
       subgroup: ''
       subgroupDescription: ''
       title: 'Delete ticket'
-      description: 'Delete a ticket. Customers can only delete their own open tickets.'
+      description: 'Delete a ticket.'
       authenticated: true
       deprecated: false
     headers:
