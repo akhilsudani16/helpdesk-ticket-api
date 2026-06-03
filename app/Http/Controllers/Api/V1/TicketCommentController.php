@@ -65,11 +65,7 @@ class TicketCommentController extends Controller
          $data = $request->validated();
 
          // Determine is_internal based on user role
-         if (Auth::user()->isAdmin() || Auth::user()->isAgent()) {
-             $isInternal = true;
-         } else {
-             $isInternal = false;
-         }
+         $isInternal = Auth::user()->isAdmin() || Auth::user()->isAgent();
 
          if ($isInternal) {
              Gate::authorize('createInternal', TicketComment::class);

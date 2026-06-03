@@ -431,7 +431,7 @@ Controllers automatically scope queries:
 // In UpdateTicketRequest
 protected function prepareForValidation(): void
 {
-    if ($this->user()->isCustomer()) {
+    if (Auth::user()->isCustomer()) {
         $this->request->remove('status');
         $this->request->remove('priority');
         $this->request->remove('assigned_to');

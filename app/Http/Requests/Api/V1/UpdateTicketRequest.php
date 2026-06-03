@@ -57,7 +57,7 @@ class UpdateTicketRequest extends FormRequest
     {
         $validated = parent::validated($key, $default);
 
-        if ($this->user()?->isCustomer()) {
+        if (Auth::user()?->isCustomer()) {
             unset($validated['status'], $validated['priority'], $validated['assigned_to']);
         }
 
@@ -69,7 +69,7 @@ class UpdateTicketRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        if ($this->user()?->isCustomer()) {
+        if (Auth::user()?->isCustomer()) {
             $input = $this->all();
 
             unset($input['status'], $input['priority'], $input['assigned_to']);
