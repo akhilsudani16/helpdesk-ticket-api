@@ -26,6 +26,7 @@ class ReplaceTicketRequest extends FormRequest
      */
     public function rules(): array
     {
+        // TODO: add validation for assigned_to for agent
         return [
             'title' => ['required', 'string', 'min:5', 'max:120'],
             'description' => ['required', 'string', 'min:20'],

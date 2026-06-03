@@ -52,6 +52,10 @@ class TicketController extends Controller
     {
         Gate::authorize('create', Ticket::class);
 
+        if ($request->user()->isAgent()) {
+            return ApiResponse::forbidden(__('messages.tickets.cannot_create_ticket'));
+        }
+
         $ticket = Ticket::create($request->validated());
 
         return ApiResponse::success(
@@ -128,9 +132,15 @@ class TicketController extends Controller
      *
      * @authenticated
      */
-    public function destroy(Ticket $ticket)
+    public function destroy(Request $request, Ticket $ticket)
     {
+
         Gate::authorize('delete', $ticket);
+
+        // Check if customer is trying to delete a non-open ticket
+        if ($request->user()->isCustomer() && $ticket->user_id !== $request->user()->id && $ticket->status->value !== 'open') {
+            return ApiResponse::forbidden(__('messages.errors.cannot_delete_ticket'));
+        }
 
         $ticket->delete();
 

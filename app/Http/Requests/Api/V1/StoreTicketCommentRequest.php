@@ -21,7 +21,7 @@ class StoreTicketCommentRequest extends FormRequest
      * @return array<string, ValidationRule|array|string>
      */
     public function rules(): array
-    {
+    { // todo: is_internal manage by us
         return [
             'body' => ['required', 'string', 'min:3', 'max:2000'],
             'is_internal' => ['sometimes', 'boolean'],

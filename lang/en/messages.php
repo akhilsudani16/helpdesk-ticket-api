@@ -20,6 +20,7 @@ return [
         'replaced' => 'Ticket replaced successfully.',
         'deleted' => 'Ticket deleted successfully.',
         'show' => 'Ticket retrieved successfully.',
+        'cannot_create_ticket' => 'You cannot create a ticket',
     ],
 
     // Comment messages
@@ -33,6 +34,7 @@ return [
     'users' => [
         'retrieved' => 'Users retrieved successfully.',
         'show' => 'User retrieved successfully.',
+        'cannot_view_customer'=> 'You cannot view the customer',
     ],
 
     // Auth messages
@@ -54,6 +56,8 @@ return [
         'forbidden' => 'Forbidden',
         'unauthorized' => 'Unauthorized',
         'customers_use_patch' => 'Customers must use PATCH for partial updates',
+        'cannot_delete_ticket' => 'You cannot delete the ticket',
+        'customers_cannot_create_comments' => 'Customers cannot view internal comments.',
     ],
 
     // Health check

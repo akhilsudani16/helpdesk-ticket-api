@@ -29,7 +29,7 @@ class TicketCommentController extends Controller
      *
      * @urlParam ticket integer required The ticket ID. Example: 1
      */
-    public function index(Request $request, Ticket $ticket)
+    public function index(Request $request, Ticket $ticket,)
     {
         Gate::authorize('viewAny', [TicketComment::class, $ticket]);
 
@@ -61,6 +61,10 @@ class TicketCommentController extends Controller
     {
         Gate::authorize('create', [TicketComment::class, $ticket]);
 
+        if ($request->user()->isCustomer()) {
+            return ApiResponse::forbidden(__('messages.errors.customers_cannot_create_comments'));
+        }
+
         $data = $request->validated();
         $isInternal = $data['is_internal'] ?? false;
 
@@ -91,11 +95,12 @@ class TicketCommentController extends Controller
      */
     public function destroy(Ticket $ticket, TicketComment $comment)
     {
+        Gate::authorize('delete', $comment);
+
         if ($comment->ticket_id !== $ticket->id) {
             return ApiResponse::notFound(__('messages.errors.not_found'));
         }
 
-        Gate::authorize('delete', $comment);
 
         $comment->delete();
 
