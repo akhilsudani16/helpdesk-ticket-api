@@ -18,15 +18,21 @@ class HealthController extends Controller
      * Check if the API is running.
      * 
      * @response 200 {
-     *   "status": "ok",
-     *   "version": "v1"
+     *   "status": "success",
+     *   "message": "API is running",
+     *   "data": {"version": "v1"},
+     *   "errors": null
      * }
      */
     public function check()
     {
         return response()->json([
-            'status' => 'ok',
-            'version' => 'v1',
+            'status' => 'success',
+            'message' => __('messages.health.ok'),
+            'data' => [
+                'version' => 'v1',
+            ],
+            'errors' => null,
         ]);
     }
 }

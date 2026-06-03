@@ -29,11 +29,53 @@ class StoreTicketRequest extends FormRequest
             'description' => ['required', 'string', 'min:20'],
             'priority' => ['required', Rule::in(TicketPriority::values())],
             'user_id' => [
-                'sometimes',
+                'required',
                 'integer',
                 'exists:users,id',
-                Rule::prohibitedIf(! ($this->user()?->isAdmin() ?? false)),
+                function ($attribute, $value, $fail) {
+                    // Non-admins can only create tickets for themselves
+                    if (!$this->user()->isAdmin() && $value != $this->user()->id) {
+                        $fail('You cannot create tickets for other users.');
+                    }
+                    
+                    // Admins can only create tickets for customers
+                    if ($this->user()->isAdmin()) {
+                        $user = \App\Models\User::find($value);
+                        if ($user && ($user->isAdmin() || $user->isAgent())) {
+                            $fail('Tickets can only be created for customers.');
+                        }
+                    }
+                },
             ],
+        ];
+    }
+
+    /**
+     * Prepare the data for validation.
+     */
+    protected function prepareForValidation(): void
+    {
+        // If user is not admin, always use authenticated user's ID
+        if (!$this->user()->isAdmin()) {
+            $this->merge([
+                'user_id' => $this->user()->id
+            ]);
+        } elseif (!$this->has('user_id')) {
+            // If admin doesn't provide user_id, use their own
+            $this->merge([
+                'user_id' => $this->user()->id
+            ]);
+        }
+    }
+    
+    /**
+     * Get custom validation messages.
+     */
+    public function messages(): array
+    {
+        return [
+            'user_id.prohibited' => 'You cannot create tickets for other users.',
+            'user_id.exists' => 'The selected user does not exist.',
         ];
     }
 }

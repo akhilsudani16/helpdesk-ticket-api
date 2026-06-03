@@ -31,12 +31,10 @@ test('user can generate token with valid credentials', function () {
             'message' => 'Token created successfully.',
         ]);
 
-    // Verify token format - should be a clean token without ID prefix
+    // Verify token format includes the ID prefix (e.g., "1|xxxxx")
     $token = $response->json('data.token');
-    expect($token)->toBeString();
-    expect(strlen($token))->toBeGreaterThan(40); // Sanctum tokens are long
-    // Token should NOT contain | because we strip the prefix in controller
-    expect($token)->not->toContain('|');
+    expect($token)->toContain('|');
+    expect(explode('|', $token))->toHaveCount(2);
 });
 
 test('invalid login returns json error', function () {

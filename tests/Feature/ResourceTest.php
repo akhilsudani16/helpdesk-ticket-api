@@ -94,10 +94,8 @@ test('comment resource hides is_internal from customers', function () {
     $response->assertStatus(200);
     $json = $response->json('data');
     
-    // Customers can see is_internal field (it will be false for public comments)
-    // but they cannot see comments where is_internal=true (filtered at query level)
-    expect($json[0])->toHaveKey('is_internal');
-    expect($json[0]['is_internal'])->toBe(false);
+    // Should not have is_internal field for customers
+    expect($json[0])->not->toHaveKey('is_internal');
 });
 
 test('comment resource shows is_internal to agents', function () {

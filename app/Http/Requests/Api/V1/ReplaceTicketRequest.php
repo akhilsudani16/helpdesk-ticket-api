@@ -26,19 +26,6 @@ class ReplaceTicketRequest extends FormRequest
      */
     public function rules(): array
     {
-        $user = $this->user();
-
-        // Customers cannot use the PUT method at all but add validation as a safety measure
-        if ($user && $user->isCustomer()) {
-            return [
-                'title' => ['required', 'string', 'min:5', 'max:120'],
-                'description' => ['required', 'string', 'min:20'],
-                'status' => ['prohibited'],
-                'priority' => ['prohibited'],
-                'assigned_to' => ['prohibited'],
-            ];
-        }
-
         return [
             'title' => ['required', 'string', 'min:5', 'max:120'],
             'description' => ['required', 'string', 'min:20'],
@@ -51,20 +38,6 @@ class ReplaceTicketRequest extends FormRequest
                         $query->where('role', UserRole::AGENT->value);
                     })
             ],
-        ];
-    }
-
-    /**
-     * Get custom error messages for validation rules.
-     *
-     * @return array<string, string>
-     */
-    public function messages(): array
-    {
-        return [
-            'status.prohibited' => __('validation.status_is_prohibited'),
-            'priority.prohibited' => __('validation.priority_is_prohibited'),
-            'assigned_to.prohibited' => __('validation.assigned_to_is_prohibited'),
         ];
     }
 }

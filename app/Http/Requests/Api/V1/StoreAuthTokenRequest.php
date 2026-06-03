@@ -25,6 +25,7 @@ class StoreAuthTokenRequest extends FormRequest
     public function rules(): array
     {
         return [
+            // 'email' => ['required', 'email:rfc,dns'],
             'email' => ['required', 'email'],
             'password' => ['required', 'string'],
             'device_name' => ['required', 'string', Rule::in(DeviceName::values())],
@@ -37,7 +38,7 @@ class StoreAuthTokenRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'device_name.in' => __('validation.device_name_is_invalid') .implode(', ', DeviceName::values()),
+            'device_name.in' => 'The selected device name is invalid. Allowed devices are: '.implode(', ', DeviceName::values()),
         ];
     }
 }

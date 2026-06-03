@@ -58,11 +58,11 @@ class TicketSeeder extends Seeder
         foreach ($statusDistribution as $status => $count) {
             for ($i = 0; $i < $count; $i++) {
                 $priority = $this->getRandomPriorityByWeight($priorityDistribution);
-
+                
                 $tickets[] = [
                     'status' => $status,
                     'priority' => $priority,
-                    'assigned' => $status ,
+                    'assigned' => $status !== TicketStatus::OPEN ? fake()->boolean(80) : fake()->boolean(30),
                 ];
             }
         }

@@ -11,16 +11,17 @@ class ApiResponse
      */
     public static function success(
         mixed $data = null,
-        string $message = 'Request successful.',
+        string $message = null,
         int $statusCode = 200
     ): JsonResponse {
         $response = [
-            'status' => $statusCode,
-            'message' => $message,
+            'status' => 'success',
+            'message' => $message ?? __('messages.success'),
+            'data' => $data,
         ];
 
-        if ($data !== null) {
-            $response['data'] = $data;
+        if (!request()->wantsJson() || request()->expectsJson()) {
+            $response['errors'] = null;
         }
 
         return response()->json($response, $statusCode);
@@ -30,18 +31,16 @@ class ApiResponse
      * Return an error JSON response.
      */
     public static function error(
-        string $message = 'Request failed.',
+        string $message = null,
         mixed $errors = null,
         int $statusCode = 400
     ): JsonResponse {
         $response = [
-            'status' => $statusCode,
-            'message' => $message,
+            'status' => 'error',
+            'message' => $message ?? __('messages.errors.validation_failed'),
+            'data' => null,
+            'errors' => $errors,
         ];
-
-        if ($errors !== null) {
-            $response['errors'] = $errors;
-        }
 
         return response()->json($response, $statusCode);
     }
@@ -50,53 +49,86 @@ class ApiResponse
      * Return a validation error response.
      */
     public static function validationError(
-        array $errors,
-        string $message = 'Validation failed.'
+        string $message = null,
+        mixed $errors = null
     ): JsonResponse {
-        return self::error($message, $errors, 422);
+        return response()->json([
+            'status' => 'error',
+            'message' => $message ?? __('messages.errors.validation_failed'),
+            'data' => null,
+            'errors' => $errors,
+        ], 422);
     }
 
     /**
      * Return an unauthorized response.
      */
     public static function unauthorized(
-        string $message = 'Unauthorized.'
+        string $message = null,
+        mixed $errors = null
     ): JsonResponse {
-        return self::error($message, null, 401);
+        return response()->json([
+            'status' => 'error',
+            'message' => $message ?? __('messages.errors.unauthorized'),
+            'data' => null,
+            'errors' => $errors,
+        ], 401);
     }
 
     /**
      * Return a forbidden response.
      */
     public static function forbidden(
-        string $message = 'Forbidden.'
+        string $message = null,
+        mixed $errors = null
     ): JsonResponse {
-        return self::error($message, null, 403);
+        return response()->json([
+            'status' => 'error',
+            'message' => $message ?? __('messages.errors.forbidden'),
+            'data' => null,
+            'errors' => $errors,
+        ], 403);
     }
 
     /**
      * Return a not found response.
      */
     public static function notFound(
-        string $message = 'Resource not found.'
+        string $message = null,
+        mixed $errors = null
     ): JsonResponse {
-        return self::error($message, null, 404);
+        return response()->json([
+            'status' => 'error',
+            'message' => $message ?? __('messages.errors.not_found'),
+            'data' => null,
+            'errors' => $errors,
+        ], 404);
     }
 
     /**
      * Return a server error response.
      */
     public static function serverError(
-        string $message = 'Internal server error.'
+        string $message = null,
+        mixed $errors = null
     ): JsonResponse {
-        return self::error($message, null, 500);
+        return response()->json([
+            'status' => 'error',
+            'message' => $message ?? __('messages.errors.server_error'),
+            'data' => null,
+            'errors' => $errors,
+        ], 500);
     }
 
     /**
-     * Return a no-content response.
+     * Return a no content response.
      */
-    public static function noContent(): JsonResponse
-    {
-        return response()->json(null, 204);
+    public static function noContent(): JsonResponse {
+        return response()->json([
+            'status' => 'success',
+            'message' => __('messages.no_content'),
+            'data' => null,
+            'errors' => null,
+        ], 204);
     }
 }

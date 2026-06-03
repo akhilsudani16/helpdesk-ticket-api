@@ -26,7 +26,7 @@
             </style>
 
     <script>
-        var tryItOutBaseUrl = "http://helpdesk-ticket-api.test";
+        var tryItOutBaseUrl = "http://localhost:8000";
         var useCsrf = Boolean();
         var csrfUrl = "/sanctum/csrf-cookie";
     </script>
@@ -72,10 +72,12 @@
                 </li>
                                     <ul id="tocify-subheader-authentication" class="tocify-subheader">
                                                     <li class="tocify-item level-2" data-unique="authentication-POSTapi-v1-auth-token">
-                                <a href="#authentication-POSTapi-v1-auth-token">Create authentication token</a>
+                                <a href="#authentication-POSTapi-v1-auth-token">Create authentication token
+* Generate a new API token for the user.</a>
                             </li>
                                                                                 <li class="tocify-item level-2" data-unique="authentication-DELETEapi-v1-auth-token">
-                                <a href="#authentication-DELETEapi-v1-auth-token">Revoke authentication token</a>
+                                <a href="#authentication-DELETEapi-v1-auth-token">Revoke authentication token
+* Delete the current user's API token.</a>
                             </li>
                                                                         </ul>
                             </ul>
@@ -152,7 +154,7 @@
     </ul>
 
     <ul class="toc-footer" id="last-updated">
-        <li>Last updated: June 2, 2026</li>
+        <li>Last updated: May 31, 2026</li>
     </ul>
 </div>
 
@@ -162,7 +164,7 @@
         <h1 id="introduction">Introduction</h1>
 <p>Helpdesk Ticket API - A production-style REST API for managing support tickets</p>
 <aside>
-    <strong>Base URL</strong>: <code>http://helpdesk-ticket-api.test</code>
+    <strong>Base URL</strong>: <code>http://localhost:8000</code>
 </aside>
 <pre><code>This documentation aims to provide all the information you need to work with our API.
 
@@ -174,14 +176,19 @@ You can switch the language used with the tabs at the top right (or from the nav
 
         <h1 id="authentication">Authentication</h1>
 
-    <p>APIs for managing authentication tokens</p>
+    <ul>
+<li>APIs for managing authentication tokens</li>
+</ul>
 
-                                <h2 id="authentication-POSTapi-v1-auth-token">Create authentication token</h2>
+                                <h2 id="authentication-POSTapi-v1-auth-token">Create authentication token
+* Generate a new API token for the user.</h2>
 
 <p>
 </p>
 
-<p>Generate a new API token for the user.</p>
+<ul>
+<li>@bodyParam email string required The user's email address. Example: admin@example.com</li>
+</ul>
 
 <span id="example-requests-POSTapi-v1-auth-token">
 <blockquote>Example request:</blockquote>
@@ -189,11 +196,11 @@ You can switch the language used with the tabs at the top right (or from the nav
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://helpdesk-ticket-api.test/api/v1/auth/token" \
+    "http://localhost:8000/api/v1/auth/token" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"email\": \"admin@example.com\",
+    \"email\": \"gbailey@example.net\",
     \"password\": \"password\",
     \"device_name\": \"Postman\"
 }"
@@ -202,7 +209,7 @@ You can switch the language used with the tabs at the top right (or from the nav
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://helpdesk-ticket-api.test/api/v1/auth/token"
+    "http://localhost:8000/api/v1/auth/token"
 );
 
 const headers = {
@@ -211,7 +218,7 @@ const headers = {
 };
 
 let body = {
-    "email": "admin@example.com",
+    "email": "gbailey@example.net",
     "password": "password",
     "device_name": "Postman"
 };
@@ -305,10 +312,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="email"                data-endpoint="POSTapi-v1-auth-token"
-               value="admin@example.com"
+               value="gbailey@example.net"
                data-component="body">
     <br>
-<p>The user's email address. Example: <code>admin@example.com</code></p>
+<p>Must be a valid email address. Example: <code>gbailey@example.net</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>password</code></b>&nbsp;&nbsp;
@@ -336,13 +343,15 @@ You can check the Dev Tools console for debugging information.</code></pre>
         </div>
         </form>
 
-                    <h2 id="authentication-DELETEapi-v1-auth-token">Revoke authentication token</h2>
+                    <h2 id="authentication-DELETEapi-v1-auth-token">Revoke authentication token
+* Delete the current user&#039;s API token.</h2>
 
 <p>
-<small class="badge badge-darkred">requires authentication</small>
 </p>
 
-<p>Delete the current user's API token.</p>
+<ul>
+<li>@authenticated</li>
+</ul>
 
 <span id="example-requests-DELETEapi-v1-auth-token">
 <blockquote>Example request:</blockquote>
@@ -350,14 +359,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request DELETE \
-    "http://helpdesk-ticket-api.test/api/v1/auth/token" \
+    "http://localhost:8000/api/v1/auth/token" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://helpdesk-ticket-api.test/api/v1/auth/token"
+    "http://localhost:8000/api/v1/auth/token"
 );
 
 const headers = {
@@ -392,7 +401,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 </span>
 <form id="form-DELETEapi-v1-auth-token" data-method="DELETE"
       data-path="api/v1/auth/token"
-      data-authed="1"
+      data-authed="0"
       data-hasfiles="0"
       data-isarraybody="0"
       autocomplete="off"
@@ -465,14 +474,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://helpdesk-ticket-api.test/api/v1/health" \
+    --get "http://localhost:8000/api/v1/health" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://helpdesk-ticket-api.test/api/v1/health"
+    "http://localhost:8000/api/v1/health"
 );
 
 const headers = {
@@ -592,14 +601,14 @@ Customers can only see public comments.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://helpdesk-ticket-api.test/api/v1/tickets/1/comments" \
+    --get "http://localhost:8000/api/v1/tickets/1/comments" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://helpdesk-ticket-api.test/api/v1/tickets/1/comments"
+    "http://localhost:8000/api/v1/tickets/1/comments"
 );
 
 const headers = {
@@ -747,7 +756,7 @@ Customers can only create public comments.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://helpdesk-ticket-api.test/api/v1/tickets/1/comments" \
+    "http://localhost:8000/api/v1/tickets/1/comments" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
@@ -759,7 +768,7 @@ Customers can only create public comments.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://helpdesk-ticket-api.test/api/v1/tickets/1/comments"
+    "http://localhost:8000/api/v1/tickets/1/comments"
 );
 
 const headers = {
@@ -929,14 +938,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request DELETE \
-    "http://helpdesk-ticket-api.test/api/v1/tickets/1/comments/1" \
+    "http://localhost:8000/api/v1/tickets/1/comments/1" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://helpdesk-ticket-api.test/api/v1/tickets/1/comments/1"
+    "http://localhost:8000/api/v1/tickets/1/comments/1"
 );
 
 const headers = {
@@ -1094,14 +1103,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://helpdesk-ticket-api.test/api/v1/tickets?include=customer%2Ccomments&amp;filter%5Bstatus%5D=open&amp;filter%5Bpriority%5D=high&amp;filter%5Bcustomer_id%5D=5&amp;filter%5Bassigned_to%5D=2&amp;filter%5Bcreated_after%5D=2026-01-01&amp;sort=-created_at&amp;page=1&amp;per_page=15" \
+    --get "http://localhost:8000/api/v1/tickets?include=customer%2Ccomments&amp;filter%5Bstatus%5D=open&amp;filter%5Bpriority%5D=high&amp;filter%5Bcustomer_id%5D=5&amp;filter%5Bassigned_to%5D=2&amp;filter%5Bcreated_after%5D=2026-01-01&amp;sort=-created_at&amp;page=1&amp;per_page=15" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://helpdesk-ticket-api.test/api/v1/tickets"
+    "http://localhost:8000/api/v1/tickets"
 );
 
 const params = {
@@ -1346,7 +1355,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://helpdesk-ticket-api.test/api/v1/tickets" \
+    "http://localhost:8000/api/v1/tickets" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
@@ -1360,7 +1369,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://helpdesk-ticket-api.test/api/v1/tickets"
+    "http://localhost:8000/api/v1/tickets"
 );
 
 const headers = {
@@ -1521,14 +1530,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://helpdesk-ticket-api.test/api/v1/tickets/1?include=customer%2Ccomments" \
+    --get "http://localhost:8000/api/v1/tickets/1?include=customer%2Ccomments" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://helpdesk-ticket-api.test/api/v1/tickets/1"
+    "http://localhost:8000/api/v1/tickets/1"
 );
 
 const params = {
@@ -1694,7 +1703,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PUT \
-    "http://helpdesk-ticket-api.test/api/v1/tickets/1" \
+    "http://localhost:8000/api/v1/tickets/1" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
@@ -1709,7 +1718,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://helpdesk-ticket-api.test/api/v1/tickets/1"
+    "http://localhost:8000/api/v1/tickets/1"
 );
 
 const headers = {
@@ -1908,7 +1917,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PATCH \
-    "http://helpdesk-ticket-api.test/api/v1/tickets/1" \
+    "http://localhost:8000/api/v1/tickets/1" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
@@ -1923,7 +1932,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://helpdesk-ticket-api.test/api/v1/tickets/1"
+    "http://localhost:8000/api/v1/tickets/1"
 );
 
 const headers = {
@@ -2122,14 +2131,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request DELETE \
-    "http://helpdesk-ticket-api.test/api/v1/tickets/1" \
+    "http://localhost:8000/api/v1/tickets/1" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://helpdesk-ticket-api.test/api/v1/tickets/1"
+    "http://localhost:8000/api/v1/tickets/1"
 );
 
 const headers = {
@@ -2263,14 +2272,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://helpdesk-ticket-api.test/api/v1/users" \
+    --get "http://localhost:8000/api/v1/users" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://helpdesk-ticket-api.test/api/v1/users"
+    "http://localhost:8000/api/v1/users"
 );
 
 const headers = {
@@ -2392,14 +2401,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://helpdesk-ticket-api.test/api/v1/users/1" \
+    --get "http://localhost:8000/api/v1/users/1" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://helpdesk-ticket-api.test/api/v1/users/1"
+    "http://localhost:8000/api/v1/users/1"
 );
 
 const headers = {

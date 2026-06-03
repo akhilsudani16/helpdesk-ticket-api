@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Api\ApiController;
+use App\Http\Controllers\Controller;
 use App\Http\Resources\V1\UserResource;
 use App\Models\User;
+use App\Support\ApiResponse;
 use Illuminate\Support\Facades\Gate;
 
 /**
@@ -12,7 +13,7 @@ use Illuminate\Support\Facades\Gate;
  * 
  * APIs for managing users (admin/agent only)
  */
-class UserController extends ApiController
+class UserController extends Controller
 {
     /**
      * List users
@@ -27,7 +28,7 @@ class UserController extends ApiController
 
         $users = User::paginate(15);
 
-        return $this->ok(UserResource::collection($users));
+        return ApiResponse::success(UserResource::collection($users), __('messages.users.retrieved'));
     }
 
     /**
@@ -43,6 +44,6 @@ class UserController extends ApiController
     {
         Gate::authorize('view', $user);
 
-        return $this->ok(new UserResource($user));
+        return ApiResponse::success(new UserResource($user), __('messages.users.show'));
     }
 }

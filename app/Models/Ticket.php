@@ -21,9 +21,7 @@ class Ticket extends Model
     use HasFactory, SoftDeletes;
 
     /**
-     * The model's default attribute values.
-     *
-     * @var array
+     * The attributes that should have default values.
      */
     protected $attributes = [
         'status' => 'open',

@@ -5,7 +5,6 @@ namespace App\Policies;
 use App\Models\Ticket;
 use App\Models\User;
 use App\Permissions\V1\Abilities;
-use Illuminate\Auth\Access\AuthorizationException;
 
 class TicketPolicy
 {
@@ -33,13 +32,7 @@ class TicketPolicy
         }
 
         // Customer can view their own tickets
-        if ($ticket->user_id === $user->id) {
-            return true;
-        }
-
-        throw new AuthorizationException(
-            __('validation.ticket_view_permission_denied')
-        );
+        return $ticket->user_id === $user->id;
     }
 
     /**
@@ -74,13 +67,7 @@ class TicketPolicy
         }
 
         // Customer can update their own tickets
-        if ($ticket->user_id === $user->id) {
-            return true;
-        }
-
-        throw new AuthorizationException(
-            __('validation.ticket_update_permission_denied')
-        );
+        return $ticket->user_id === $user->id;
     }
 
     /**
@@ -102,19 +89,11 @@ class TicketPolicy
         }
 
         // Customer can delete their own ticket only if the status is 'open'
-        if ($user->isCustomer() && $ticket->user_id === $user->id) {
-            if ($ticket->status->value === 'open') {
-                return true;
-            }
-
-            throw new AuthorizationException(
-                __('validation.ticket_only_open_delete_permission') . $ticket->status->value . '.'
-            );
+        if ($user->isCustomer() && $ticket->user_id === $user->id && $ticket->status->value === 'open') {
+            return true;
         }
 
-        throw new AuthorizationException(
-            __('validation.ticket_delete_permission_denied')
-        );
+        return false;
     }
 
     /**

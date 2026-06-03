@@ -22,8 +22,8 @@ Route::prefix('v1')->group(function () {
         Route::get('/tickets', [TicketController::class, 'index'])->name('tickets.index');
         Route::post('/tickets', [TicketController::class, 'store'])->name('tickets.store');
         Route::get('/tickets/{ticket}', [TicketController::class, 'show'])->name('tickets.show');
-        Route::put('/tickets/{ticket}', [TicketController::class, 'update'])->name('tickets.update');
-        Route::patch('/tickets/{ticket}', [TicketController::class, 'patch'])->name('tickets.patch');
+        Route::put('/tickets/{ticket}', [TicketController::class, 'replace'])->name('tickets.update');
+        Route::patch('/tickets/{ticket}', [TicketController::class, 'update'])->name('tickets.patch');
         Route::delete('/tickets/{ticket}', [TicketController::class, 'destroy'])->name('tickets.destroy');
 
         // Ticket Comments

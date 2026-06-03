@@ -215,47 +215,47 @@ test('sorting descending by created_at works', function () {
     expect($data[0]['id'])->toBe($ticket3->id);
 });
 
-test('unsupported sort field returns 400', function () {
+test('unsupported sort field returns 422', function () {
     $customer = User::factory()->customer()->create();
     $token = $customer->createToken('Test', [Abilities::ViewTickets])->plainTextToken;
 
     $response = $this->withToken($token)
         ->getJson('/api/v1/tickets?sort=invalid_field');
 
-    $response->assertStatus(400);
+    $response->assertStatus(422);
 });
 
-test('unsupported filter returns 400', function () {
+test('unsupported filter returns 422', function () {
     $customer = User::factory()->customer()->create();
     $token = $customer->createToken('Test', [Abilities::ViewTickets])->plainTextToken;
 
     $response = $this->withToken($token)
         ->getJson('/api/v1/tickets?filter[invalid_field]=value');
 
-    $response->assertStatus(400)
+    $response->assertStatus(422)
         ->assertJson([
             'status' => 'error',
         ]);
 });
 
-test('invalid status filter value returns 400', function () {
+test('invalid status filter value returns 422', function () {
     $customer = User::factory()->customer()->create();
     $token = $customer->createToken('Test', [Abilities::ViewTickets])->plainTextToken;
 
     $response = $this->withToken($token)
         ->getJson('/api/v1/tickets?filter[status]=invalid_status');
 
-    $response->assertStatus(400);
+    $response->assertStatus(422);
 });
 
-test('invalid date format for created_after returns 400', function () {
+test('invalid date format for created_after returns 422', function () {
     $customer = User::factory()->customer()->create();
     $token = $customer->createToken('Test', [Abilities::ViewTickets])->plainTextToken;
 
     $response = $this->withToken($token)
         ->getJson('/api/v1/tickets?filter[created_after]=invalid-date');
 
-    $response->assertStatus(400);
+    $response->assertStatus(422);
 });
 
 test('customer cannot send forbidden fields in update request', function () {

@@ -2,16 +2,15 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Exceptions\InvalidQueryParameterException;
-use App\Http\Controllers\Api\ApiController;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\ReplaceTicketRequest;
 use App\Http\Requests\Api\V1\StoreTicketRequest;
 use App\Http\Requests\Api\V1\UpdateTicketRequest;
-use App\Http\Resources\V1\TicketCollection;
 use App\Http\Resources\V1\TicketResource;
 use App\Models\Ticket;
-use App\Policies\TicketPolicy;
+use App\Support\ApiResponse;
 use App\Support\Filters\TicketFilter;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
 /**
@@ -19,62 +18,46 @@ use Illuminate\Support\Facades\Gate;
  *
  * APIs for managing support tickets
  */
-class TicketController extends ApiController
+class TicketController extends Controller
 {
-    protected string $policyClass = TicketPolicy::class;
-
     /**
      * List tickets
      *
      * Get a paginated list of tickets with optional filtering and sorting.
+     * Filtering, sorting, and include validation handled by TicketFilter.
      *
      * @authenticated
-     *
-     * @queryParam include string Comma-separated list of relationships to include. Example: customer,comments
-     * @queryParam filter[status] string Filter by status. Example: open
-     * @queryParam filter[priority] string Filter by priority. Example: high
-     * @queryParam filter[customer_id] integer Filter by customer ID. Example: 5
-     * @queryParam filter[assigned_to] integer Filter by assigned agent ID. Example: 2
-     * @queryParam filter[created_after] string Filter by creation date. Example: 2026-01-01
-     * @queryParam sort string Sort by field. Prefix with - for descending. Example: -created_at
-     * @queryParam page integer Page number. Example: 1
-     * @queryParam per_page integer Items per page. Example: 15
-     * @throws InvalidQueryParameterException
      */
-    public function index(TicketFilter $filters)
+    public function index(Request $request)
     {
         Gate::authorize('viewAny', Ticket::class);
 
-        $tickets = Ticket::filter($filters)
-            ->paginate($this->request->query('per_page', 15));
-
-        return $this->ok(TicketCollection::make($tickets, __('validation.ticket_found')));
+        return ApiResponse::success(
+            TicketResource::collection(
+                Ticket::filter(new TicketFilter($request))->paginate()
+            )->toArray($request),
+            __('messages.tickets.retrieved')
+        );
     }
+
     /**
      * Create ticket
      *
-     * Create a new support ticket.
+     * Create a new support ticket. Validation rules handled by StoreTicketRequest.
      *
      * @authenticated
-     *
-     * @bodyParam title string required Ticket title. Example: Payment failed
-     * @bodyParam description string required Ticket description. Example: I paid but account not upgraded.
-     * @bodyParam priority string required Priority level. Example: high
-     * @bodyParam user_id integer User ID (admin only). Example: 5
      */
-
     public function store(StoreTicketRequest $request)
     {
         Gate::authorize('create', Ticket::class);
 
-        $data = $request->validated();
+        $ticket = Ticket::create($request->validated());
 
-        // Set user_id to current user if not provided
-        $data['user_id'] = $data['user_id'] ?? $request->user()->id;
-
-        $ticket = Ticket::create($data)->load('customer', 'assignedAgent');
-
-        return $this->ok(new TicketResource($ticket), __('validation.ticket_create'), 201);
+        return ApiResponse::success(
+            (new TicketResource($ticket))->toArray($request),
+            __('messages.tickets.created'),
+            201
+        );
     }
 
     /**
@@ -83,98 +66,73 @@ class TicketController extends ApiController
      * Get details of a specific ticket.
      *
      * @authenticated
-     *
-     * @urlParam ticket integer required The ticket ID. Example: 1
-     * @queryParam include string Comma-separated relationships. Example: customer,comments
-     * @throws InvalidQueryParameterException
      */
     public function show(Ticket $ticket)
     {
         Gate::authorize('view', $ticket);
 
-        // Validate and apply includes
-        $allowedIncludes = ['customer', 'assignedAgent', 'comments'];
-        $requestedIncludes = $this->validateIncludes($allowedIncludes);
-
-        // Build relationships to load
-        $relations = ['customer', 'assignedAgent'];
-
-        if (in_array('comments', $requestedIncludes)) {
-            $relations[] = 'comments.user';
-        }
-
-        $ticket->loadMissing($relations);
-
-        return $this->ok(new TicketResource($ticket));
+        return ApiResponse::success(
+            (new TicketResource($ticket))->toArray(request()),
+            __('messages.tickets.show')
+        );
     }
 
     /**
      * Update ticket (PATCH)
      *
-     * Partially update a ticket.
+     * Partially update a ticket. Validation rules handled by UpdateTicketRequest.
      *
      * @authenticated
-     *
-     * @urlParam ticket integer required The ticket ID. Example: 1
-     * @bodyParam title string Ticket title. Example: Updated title
-     * @bodyParam description string Ticket description. Example: Updated description
-     * @bodyParam status string Status. Example: in_progress
-     * @bodyParam priority string Priority. Example: medium
-     * @bodyParam assigned_to integer Assigned agent ID. Example: 2
      */
-    public function patch(UpdateTicketRequest $request, Ticket $ticket)
+    public function update(UpdateTicketRequest $request, Ticket $ticket)
     {
         Gate::authorize('update', $ticket);
 
         $ticket->update($request->validated());
-        $ticket->load(['customer', 'assignedAgent']);
-
-        return $this->ok(new TicketResource($ticket), __('validation.ticket_update'));
+        
+        return ApiResponse::success(
+            (new TicketResource($ticket))->toArray($request),
+            __('messages.tickets.updated')
+        );
     }
 
     /**
      * Replace ticket (PUT)
      *
-     * Fully replace a ticket. All fields are required.
+     * Fully replace a ticket. Validation rules handled by ReplaceTicketRequest.
+     * Customers cannot use PUT - they must use PATCH.
      *
      * @authenticated
-     *
-     * @urlParam ticket integer required The ticket ID. Example: 1
-     * @bodyParam title string required Ticket title. Example: Payment failed
-     * @bodyParam description string required Ticket description. Example: Full description
-     * @bodyParam status string required Status. Example: open
-     * @bodyParam priority string required Priority level. Example: high
-     * @bodyParam assigned_to integer Assigned agent ID. Example: 2
      */
-    public function update(ReplaceTicketRequest $request, Ticket $ticket)
+    public function replace(ReplaceTicketRequest $request, Ticket $ticket)
     {
         Gate::authorize('update', $ticket);
 
-        if ($this->request->user()->isCustomer()) {
-            return $this->notAuthorized( __('validation.ticket_user_update') );
+        if ($request->user()->isCustomer()) {
+            return ApiResponse::forbidden(__('messages.errors.customers_use_patch'));
         }
 
         $ticket->update($request->validated());
-        $ticket->load(['customer', 'assignedAgent']);
-
-        return $this->ok(new TicketResource($ticket), __('validation.ticket_replaced'));
+        
+        return ApiResponse::success(
+            (new TicketResource($ticket))->toArray($request),
+            __('messages.tickets.replaced')
+        );
     }
 
     /**
      * Delete ticket
      *
-     * Delete a ticket.
+     * Delete a ticket. Authorization rules handled by TicketPolicy.
      *
      * @authenticated
-     *
-     * @urlParam ticket integer required The ticket ID. Example: 1
      */
     public function destroy(Ticket $ticket)
     {
         Gate::authorize('delete', $ticket);
 
         $ticket->delete();
-
-        return $this->ok(null, __('validation.ticket_deleted'));
+        
+        return ApiResponse::success(null, __('messages.tickets.deleted'));
     }
 }

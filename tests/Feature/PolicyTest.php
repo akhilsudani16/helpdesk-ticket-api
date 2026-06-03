@@ -158,13 +158,15 @@ test('comment policy internal comment restriction', function () {
     $agentTicket = Ticket::factory()->create(['user_id' => $customer->id, 'assigned_to' => $agent->id]);
     $adminTicket = Ticket::factory()->create(['user_id' => $customer->id]);
     
-    // Customer cannot create internal comment (validation error)
+    // Customer cannot create internal comment (is_internal is stripped)
     $tokenCustomer = $customer->createToken('Test', Abilities::getAbilities($customer))->plainTextToken;
     $response = $this->withToken($tokenCustomer)->postJson("/api/v1/tickets/{$customerTicket->id}/comments", [
         'body' => 'Test comment',
         'is_internal' => true,
     ]);
-    $response->assertStatus(422); // Validation error
+    $response->assertStatus(201);
+    $comment = TicketComment::where('ticket_id', $customerTicket->id)->latest()->first();
+    expect($comment->is_internal)->toBeFalse(); // Should be false
     
     // Flush auth
     $this->app->forgetInstance('auth');

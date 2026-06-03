@@ -16,10 +16,27 @@ class TicketCommentSeeder extends Seeder
 
         $agents = User::where('role', UserRole::AGENT)->get();
         $admin = User::where('role', UserRole::ADMIN)->first();
-        $tickets = Ticket::with('customer')->get();
+        $tickets = Ticket::all();
+
+
+        $allCustomers = User::where('role', UserRole::CUSTOMER)->get();
 
         foreach ($tickets as $ticket) {
-            $this->createCommentsForTicket($ticket, $ticket->customer, $agents, $admin);
+
+            $customer = $ticket->customer;
+
+
+            if (!$customer) {
+                $customerId = $ticket->customer_id;
+                $customer = User::find($customerId);
+            }
+
+
+            if (!$customer) {
+                $customer = $allCustomers->random();
+            }
+
+            $this->createCommentsForTicket($ticket, $customer, $agents, $admin);
         }
 
         $this->command->info('Ticket comments created successfully');
@@ -67,30 +84,31 @@ class TicketCommentSeeder extends Seeder
             ]);
         }
 
-        if ($author->isCustomer()) {
+
+        if (method_exists($author, 'isCustomer') ? $author->isCustomer() : $author->role === UserRole::CUSTOMER) {
             if ($commentIndex === 0) {
                 return 'I am experiencing issues with ' . fake()->randomElement([
                     'login functionality', 'payment processing', 'data synchronization',
                     'email notifications', 'mobile app crashes'
                 ]) . '. Please help resolve this as soon as possible.';
+            } else {
+                return fake()->randomElement([
+                    'Thank you for the quick response. The issue is now resolved.',
+                    'I tried the suggested solution but the problem persists.',
+                    'Could you please provide more details on the next steps?',
+                    'The issue seems to be intermittent. It works sometimes.',
+                    'I have additional information that might help with the diagnosis.',
+                ]);
             }
-            
+        } else {
             return fake()->randomElement([
-                'Thank you for the quick response. The issue is now resolved.',
-                'I tried the suggested solution but the problem persists.',
-                'Could you please provide more details on the next steps?',
-                'The issue seems to be intermittent. It works sometimes.',
-                'I have additional information that might help with the diagnosis.',
+                'Thank you for contacting support. I am looking into this issue.',
+                'I have identified the root cause and am working on a solution.',
+                'Please try clearing your browser cache and cookies, then retry.',
+                'I have applied a fix on our end. Please test and confirm if the issue is resolved.',
+                'This issue has been resolved. Please let us know if you need further assistance.',
+                'I am escalating this to our technical team for further investigation.',
             ]);
         }
-
-        return fake()->randomElement([
-            'Thank you for contacting support. I am looking into this issue.',
-            'I have identified the root cause and am working on a solution.',
-            'Please try clearing your browser cache and cookies, then retry.',
-            'I have applied a fix on our end. Please test and confirm if the issue is resolved.',
-            'This issue has been resolved. Please let us know if you need further assistance.',
-            'I am escalating this to our technical team for further investigation.',
-        ]);
     }
 }

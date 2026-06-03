@@ -29,4 +29,30 @@ enum TicketPriority: string
             self::URGENT => 'Urgent',
         };
     }
+
+    /**
+     * Get priority weight for sorting.
+     */
+    public function weight(): int
+    {
+        return match ($this) {
+            self::LOW => 1,
+            self::MEDIUM => 2,
+            self::HIGH => 3,
+            self::URGENT => 4,
+        };
+    }
+
+    /**
+     * Get priority color for UI.
+     */
+    public function color(): string
+    {
+        return match ($this) {
+            self::LOW => 'green',
+            self::MEDIUM => 'yellow',
+            self::HIGH => 'orange',
+            self::URGENT => 'red',
+        };
+    }
 }

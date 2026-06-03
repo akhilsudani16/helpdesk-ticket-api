@@ -8,61 +8,91 @@ return [
     |--------------------------------------------------------------------------
     |
     | The following language lines contain the default error messages used by
-    | the validator class. Some of these rules have multiple versions such
-    | as the size rules. Feel free to tweak each of these messages here.
+    | the validator class. Only the validation rules actually used in this
+    | project are included here.
     |
     */
 
-    // Ticket Controller validation messages
-    'ticket_found' => 'Ticket found successfully.',
-    'ticket_create' => 'Ticket created successfully.',
-    'ticket_update' => 'Ticket updated successfully.',
-    'ticket_user_update' => 'Customers must use PATCH for partial updates.',
-    'ticket_replaced' => 'Ticket replaced successfully.',
-    'ticket_deleted' => 'Ticket deleted successfully.',
+    // Used in StoreTicketCommentRequest
+    'boolean' => 'The :attribute field must be true or false.',
 
+    // Used in StoreAuthTokenRequest
+    'email' => 'The :attribute field must be a valid email address.',
 
-    // TicketComment Controller validation messages
-    'comment_create' => 'Comment created successfully.',
-    'internal_comment_permission' => 'You cannot create internal comments.',
-    'comment_not_belongs_to_ticket' => 'Comment does not belong to this ticket.',
-    'comment_deleted' => 'Comment deleted successfully.',
+    // Used in StoreTicketRequest, UpdateTicketRequest, ReplaceTicketRequest
+    'exists' => 'The selected :attribute is invalid.',
 
-    // request validation messages
+    // Used in StoreTicketRequest, UpdateTicketRequest, ReplaceTicketRequest, StoreAuthTokenRequest
+    'in' => 'The selected :attribute is invalid.',
 
-    'status_is_prohibited' => 'You cannot update the status field.',
-    'priority_is_prohibited' => 'You cannot update the priority field.',
-    'assigned_to_is_prohibited' => 'You cannot update the assigned_to field.',
+    // Used in StoreTicketRequest, UpdateTicketRequest, ReplaceTicketRequest
+    'integer' => 'The :attribute field must be an integer.',
 
-    'device_name_is_invalid' => 'The selected device name is invalid. Allowed devices are: ',
+    // Used in StoreTicketRequest, UpdateTicketRequest, ReplaceTicketRequest, StoreTicketCommentRequest
+    'max' => [
+        'string' => 'The :attribute field must not be greater than :max characters.',
+    ],
 
-    'customer_not_allow_internal_comment' => 'You are not allowed to create internal comments.',
-    'body_is_required' => 'Comment body is required.',
-    'comment_body_min' => 'Comment must be at least 3 characters.',
-    'comment_body_max' => 'Comment cannot exceed 2000 characters.',
-    'is_internal_must_be_boolean'  => 'The is_internal field must be true or false.',
+    // Used in StoreTicketRequest, UpdateTicketRequest, ReplaceTicketRequest, StoreTicketCommentRequest
+    'min' => [
+        'string' => 'The :attribute field must be at least :min characters.',
+    ],
 
+    // Used in UpdateTicketRequest, ReplaceTicketRequest
+    'nullable' => 'The :attribute field may be null.',
 
-    // Ticket Policy validation messages
+    // Used in StoreTicketRequest
+    'prohibited_if' => 'The :attribute field is prohibited when :other is :value.',
 
-    // Ticket Comment policy
-    'ticket_view_comment_permission_denied' => 'You do not have permission to view comments on this ticket.',
-    'internal_comment_permission_denied' => 'You do not have permission to view internal comments.',
-    'ticket_comment_create_permission_denied' => 'You do not have permission to create comments on this ticket.',
-    'internal_comment_create_permission_denied' => 'Only administrators and agents can create internal comments.',
-    'comment_delete_permission_denied' => 'You can only delete your own comments.',
+    // Used in StoreTicketRequest, UpdateTicketRequest, ReplaceTicketRequest, StoreAuthTokenRequest, StoreTicketCommentRequest
+    'required' => 'The :attribute field is required.',
 
-    // Ticket policy
-    'ticket_view_permission_denied' => 'You do not have permission to view this ticket.',
-    'ticket_update_permission_denied' => 'You do not have permission to update this ticket.',
-    'ticket_only_open_delete_permission' => 'You can only delete tickets with status "open". This ticket is ',
-    'ticket_delete_permission_denied' => 'You do not have permission to delete this ticket.',
+    // Used in UpdateTicketRequest, StoreTicketCommentRequest
+    'sometimes' => 'The :attribute field is optional.',
 
-    // User policy
-    'user_view_permission_denied' => 'You do not have permission to view this user.',
+    // Used in StoreTicketRequest, UpdateTicketRequest, ReplaceTicketRequest, StoreAuthTokenRequest, StoreTicketCommentRequest
+    'string' => 'The :attribute field must be a string.',
 
-    // Ticket Filter
-    'unsupported_include' => 'Unsupported include parameter: ',
-    'allowed' => '. Allowed: ',
-    'unsupported_filter' => 'Unsupported filter(s): ',
+    /*
+    |--------------------------------------------------------------------------
+    | Custom Validation Language Lines
+    |--------------------------------------------------------------------------
+    |
+    | Here you may specify custom validation messages for attributes using the
+    | convention "rule.attribute" to name the lines. This makes it quick to
+    | specify a specific custom language line for a given attribute rule.
+    |
+    */
+
+    'custom' => [
+        'attribute-name' => [
+            'rule-name' => 'custom-message',
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Custom Validation Attributes
+    |--------------------------------------------------------------------------
+    |
+    | The following language lines are used to swap our attribute placeholder
+    | with something more reader friendly such as "E-Mail Address" instead
+    | of "email". This simply helps us make our message more expressive.
+    |
+    */
+
+    'attributes' => [
+        'email' => 'email address',
+        'password' => 'password',
+        'device_name' => 'device name',
+        'title' => 'title',
+        'description' => 'description',
+        'status' => 'status',
+        'priority' => 'priority',
+        'user_id' => 'user',
+        'assigned_to' => 'assigned agent',
+        'body' => 'comment',
+        'is_internal' => 'internal flag',
+    ],
+
 ];

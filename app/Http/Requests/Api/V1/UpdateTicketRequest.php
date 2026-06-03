@@ -33,12 +33,7 @@ class UpdateTicketRequest extends FormRequest
             'description' => ['sometimes', 'string', 'min:20'],
         ];
 
-        // Check if customer is trying to update restricted fields
-        if ($user && $user->isCustomer()) {
-            $rules['status'] = ['prohibited'];
-            $rules['priority'] = ['prohibited'];
-            $rules['assigned_to'] = ['prohibited'];
-        } elseif ($user && ($user->isAdmin() || $user->isAgent())) {
+        if ($user && ($user->isAdmin() || $user->isAgent())) {
             $rules['status'] = ['sometimes', Rule::in(TicketStatus::values())];
             $rules['priority'] = ['sometimes', Rule::in(TicketPriority::values())];
             $rules['assigned_to'] = [
@@ -55,18 +50,30 @@ class UpdateTicketRequest extends FormRequest
     }
 
     /**
-     * Get custom error messages for validation rules.
-     *
-     * @return array<string, string>
+     * Get validated data with forbidden fields removed.
      */
-    public function messages(): array
+    public function validated($key = null, $default = null)
     {
-        return [
-            'status.prohibited' => __('validation.status_is_prohibited'),
-            'priority.prohibited' => __('validation.priority_is_prohibited'),
-            'assigned_to.prohibited' => __('validation.assigned_to_is_prohibited'),
-        ];
+        $validated = parent::validated($key, $default);
+
+        if ($this->user()?->isCustomer()) {
+            unset($validated['status'], $validated['priority'], $validated['assigned_to']);
+        }
+
+        return $validated;
     }
 
+    /**
+     * Prepare the data for validation.
+     */
+    protected function prepareForValidation(): void
+    {
+        if ($this->user()?->isCustomer()) {
+            $input = $this->all();
 
+            unset($input['status'], $input['priority'], $input['assigned_to']);
+
+            $this->replace($input);
+        }
+    }
 }

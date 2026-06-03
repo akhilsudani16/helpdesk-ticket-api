@@ -14,30 +14,70 @@ class TicketResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $rawIncludes = $request->query('include', '');
-        $includes = array_filter(array_map('trim', explode(',', $rawIncludes)));
-
-        $hasInclude = function (array $names) use ($includes) {
-            foreach ($names as $n) {
-                if (in_array($n, $includes, true)) {
-                    return true;
-                }
-            }
-            return false;
-        };
-
-        return [
-            'id' => $this->id,
-            'title' => $this->title,
-            'description' => $this->description,
-            'status' => $this->status,
-            'priority' => $this->priority,
-            'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
-            'updated_at' => $this->updated_at?->format('Y-m-d H:i:s'),
-            // only include relations when requested via ?include=
-            'customer' => $this->when($hasInclude(['customer', 'customer_id']), UserResource::make($this->whenLoaded('customer'))),
-            'assigned_agent' => $this->when($hasInclude(['assignedAgent', 'assigned_agent', 'assigned-to']), UserResource::make($this->whenLoaded('assignedAgent'))),
-            'comments' => $this->when($hasInclude(['comments']), TicketCommentResource::collection($this->whenLoaded('comments'))),
+        $data = [
+            
+                'id' => $this->id,
+                'title' => $this->title,
+                'description' => $this->description,
+                'status' => $this->status,
+                'priority' => $this->priority,
+                'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
+                'updated_at' => $this->updated_at?->format('Y-m-d H:i:s'),
+            
         ];
+
+        // Build includes only if relationships are loaded
+        $includes = [];
+        if ($this->relationLoaded('customer')) {
+            $includes['customer'] = new UserResource($this->customer);
+        }
+        if ($this->relationLoaded('assignedAgent')) {
+            $includes['assigned_agent'] = new UserResource($this->assignedAgent);
+        }
+        if ($this->relationLoaded('comments')) {
+            $includes['comments'] = TicketCommentResource::collection($this->comments);
+        }
+
+        // Only add includes key if there are any includes
+        if (!empty($includes)) {
+            $data['includes'] = $includes;
+        }
+
+        // Build relationships only if any include is requested
+        $relationships = [];
+        if (!empty($includes)) {
+            $relationships['customer'] = [
+                'data' => [
+                    'type' => 'user',
+                    'id' => $this->user_id,
+                ],
+                'links' => [
+                    'self' => route('users.show', ['user' => $this->user_id]),
+                ],
+            ];
+
+            if ($this->assigned_to) {
+                $relationships['assigned_agent'] = [
+                    'data' => [
+                        'type' => 'user',
+                        'id' => $this->assigned_to,
+                    ],
+                    'links' => [
+                        'self' => route('users.show', ['user' => $this->assigned_to]),
+                    ],
+                ];
+            }
+        }
+
+        // Only add relationships key if there are any relationships
+        if (!empty($relationships)) {
+            $data['relationships'] = $relationships;
+        }
+
+        $data['links'] = [
+            'self' => route('tickets.show', ['ticket' => $this->id]),
+        ];
+
+        return $data;
     }
 }

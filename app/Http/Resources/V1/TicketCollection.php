@@ -15,7 +15,7 @@ class TicketCollection extends ResourceCollection
     public function toArray(Request $request): array
     {
         return [
-            'data' => $this->collection,
+            'tickets' => $this->collection,
             'meta' => [
                 'current_page' => $this->currentPage(),
                 'from' => $this->firstItem(),

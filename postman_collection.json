@@ -1,1046 +1,422 @@
 {
-    "info": {
-        "_postman_id": "03e8690d-79eb-45fa-ac8a-17ad4f8e846f",
-        "name": "Helpdesk-ticket-api",
-        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-        "_exporter_id": "53606323",
-        "_collection_link": "https://go.postman.co/collection/53606323-03e8690d-79eb-45fa-ac8a-17ad4f8e846f?source=collection_link"
-    },
-    "item": [
-        {
-            "name": "Auth",
-            "item": [
-                {
-                    "name": "Auth Login",
-                    "request": {
-                        "auth": {
-                            "type": "noauth"
-                        },
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "body": {
-                            "mode": "formdata",
-                            "formdata": [
-                                {
-                                    "key": "email",
-                                    "value": "admin@example.com",
-                                    "type": "text",
-                                    "uuid": "44b19a4c-f3f4-4300-a17e-3c1be14e3747"
-                                },
-                                {
-                                    "key": "password",
-                                    "value": "password",
-                                    "type": "text",
-                                    "uuid": "71397816-a56e-4539-92a6-5d4687199d67"
-                                },
-                                {
-                                    "key": "device_name",
-                                    "value": "Postman",
-                                    "type": "text",
-                                    "uuid": "3176ea65-2402-4c06-ba01-e16cd37ae082"
-                                },
-                                {
-                                    "key": "email",
-                                    "value": "customer1@example.com",
-                                    "type": "text",
-                                    "uuid": "f81cc541-01bc-42f4-9d13-5ea9a2b6a053",
-                                    "disabled": true
-                                },
-                                {
-                                    "key": "email",
-                                    "value": "agent1@example.com",
-                                    "type": "text",
-                                    "uuid": "ae527def-5c6d-4834-8276-d9dc995876eb",
-                                    "disabled": true
-                                }
-                            ]
-                        },
-                        "url": {
-                            "raw": "http://localhost:8000/api/v1/auth/token",
-                            "protocol": "http",
-                            "host": [
-                                "localhost"
-                            ],
-                            "port": "8000",
-                            "path": [
-                                "api",
-                                "v1",
-                                "auth",
-                                "token"
-                            ]
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Auth Logout",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{Bearer}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "DELETE",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        },
-                        "url": {
-                            "raw": "http://localhost:8000/api/v1/auth/token",
-                            "protocol": "http",
-                            "host": [
-                                "localhost"
-                            ],
-                            "port": "8000",
-                            "path": [
-                                "api",
-                                "v1",
-                                "auth",
-                                "token"
-                            ]
-                        }
-                    },
-                    "response": []
-                }
-            ]
-        },
-        {
-            "name": "Ticket",
-            "item": [
-                {
-                    "name": "Get Tickets",
-                    "protocolProfileBehavior": {
-                        "disableBodyPruning": true
-                    },
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{Bearer}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        },
-                        "url": {
-                            "raw": "http://localhost:8000/api/v1/tickets",
-                            "protocol": "http",
-                            "host": [
-                                "localhost"
-                            ],
-                            "port": "8000",
-                            "path": [
-                                "api",
-                                "v1",
-                                "tickets"
-                            ]
-                        }
-                    },
-                    "response": [
-                        {
-                            "name": "Include Tickets",
-                            "originalRequest": {
-                                "method": "GET",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json",
-                                        "type": "text"
-                                    }
-                                ],
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "",
-                                    "options": {
-                                        "raw": {
-                                            "language": "json"
-                                        }
-                                    }
-                                },
-                                "url": {
-                                    "raw": "http://localhost:8000/api/v1/tickets?include=customer,assignedAgent,comments",
-                                    "protocol": "http",
-                                    "host": [
-                                        "localhost"
-                                    ],
-                                    "port": "8000",
-                                    "path": [
-                                        "api",
-                                        "v1",
-                                        "tickets"
-                                    ],
-                                    "query": [
-                                        {
-                                            "key": "include",
-                                            "value": "customer,assignedAgent,comments"
-                                        }
-                                    ]
-                                }
-                            },
-                            "_postman_previewlanguage": null,
-                            "header": null,
-                            "cookie": [],
-                            "body": null
-                        },
-                        {
-                            "name": "Filter Tickets",
-                            "originalRequest": {
-                                "method": "GET",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json",
-                                        "type": "text"
-                                    }
-                                ],
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "",
-                                    "options": {
-                                        "raw": {
-                                            "language": "json"
-                                        }
-                                    }
-                                },
-                                "url": {
-                                    "raw": "http://localhost:8000/api/v1/tickets?filter[status]=in_progress",
-                                    "protocol": "http",
-                                    "host": [
-                                        "localhost"
-                                    ],
-                                    "port": "8000",
-                                    "path": [
-                                        "api",
-                                        "v1",
-                                        "tickets"
-                                    ],
-                                    "query": [
-                                        {
-                                            "key": "filter[status]",
-                                            "value": "in_progress"
-                                        }
-                                    ]
-                                }
-                            },
-                            "_postman_previewlanguage": "",
-                            "header": [],
-                            "cookie": [
-                                {
-                                    "expires": "Invalid Date",
-                                    "domain": "",
-                                    "path": ""
-                                }
-                            ],
-                            "body": ""
-                        },
-                        {
-                            "name": "Sort Tickets",
-                            "originalRequest": {
-                                "method": "GET",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json",
-                                        "type": "text"
-                                    }
-                                ],
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "",
-                                    "options": {
-                                        "raw": {
-                                            "language": "json"
-                                        }
-                                    }
-                                },
-                                "url": {
-                                    "raw": "http://localhost:8000/api/v1/tickets?sort=status",
-                                    "protocol": "http",
-                                    "host": [
-                                        "localhost"
-                                    ],
-                                    "port": "8000",
-                                    "path": [
-                                        "api",
-                                        "v1",
-                                        "tickets"
-                                    ],
-                                    "query": [
-                                        {
-                                            "key": "sort",
-                                            "value": "status"
-                                        }
-                                    ]
-                                }
-                            },
-                            "_postman_previewlanguage": "",
-                            "header": [],
-                            "cookie": [
-                                {
-                                    "expires": "Invalid Date",
-                                    "domain": "",
-                                    "path": ""
-                                }
-                            ],
-                            "body": ""
-                        },
-                        {
-                            "name": "Combined Ticket",
-                            "originalRequest": {
-                                "method": "GET",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json",
-                                        "type": "text"
-                                    }
-                                ],
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "",
-                                    "options": {
-                                        "raw": {
-                                            "language": "json"
-                                        }
-                                    }
-                                },
-                                "url": {
-                                    "raw": "http://localhost:8000/api/v1/tickets?filter[status]=open&sort=-created_at&include=customer&page=1&per_page=15",
-                                    "protocol": "http",
-                                    "host": [
-                                        "localhost"
-                                    ],
-                                    "port": "8000",
-                                    "path": [
-                                        "api",
-                                        "v1",
-                                        "tickets"
-                                    ],
-                                    "query": [
-                                        {
-                                            "key": "filter[status]",
-                                            "value": "open"
-                                        },
-                                        {
-                                            "key": "sort",
-                                            "value": "-created_at"
-                                        },
-                                        {
-                                            "key": "include",
-                                            "value": "customer"
-                                        },
-                                        {
-                                            "key": "page",
-                                            "value": "1"
-                                        },
-                                        {
-                                            "key": "per_page",
-                                            "value": "15"
-                                        }
-                                    ]
-                                }
-                            },
-                            "_postman_previewlanguage": "",
-                            "header": [],
-                            "cookie": [
-                                {
-                                    "expires": "Invalid Date",
-                                    "domain": "",
-                                    "path": ""
-                                }
-                            ],
-                            "body": ""
-                        },
-                        {
-                            "name": "Pagination Tickets",
-                            "originalRequest": {
-                                "method": "GET",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json",
-                                        "type": "text"
-                                    }
-                                ],
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "",
-                                    "options": {
-                                        "raw": {
-                                            "language": "json"
-                                        }
-                                    }
-                                },
-                                "url": {
-                                    "raw": "http://localhost:8000/api/v1/tickets?page=1&per_page=15",
-                                    "protocol": "http",
-                                    "host": [
-                                        "localhost"
-                                    ],
-                                    "port": "8000",
-                                    "path": [
-                                        "api",
-                                        "v1",
-                                        "tickets"
-                                    ],
-                                    "query": [
-                                        {
-                                            "key": "page",
-                                            "value": "1"
-                                        },
-                                        {
-                                            "key": "per_page",
-                                            "value": "15"
-                                        }
-                                    ]
-                                }
-                            },
-                            "_postman_previewlanguage": "",
-                            "header": [],
-                            "cookie": [
-                                {
-                                    "expires": "Invalid Date",
-                                    "domain": "",
-                                    "path": ""
-                                }
-                            ],
-                            "body": ""
-                        }
-                    ]
-                },
-                {
-                    "name": "Post Ticket",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{Bearer}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"title\": \"Billing issue for customer\",\n  \"description\": \"Customer reports double charge on invoice #12345. Please investigate and refund if needed.\",\n  \"priority\": \"urgent\",\n  \"user_id\": 7\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        },
-                        "url": {
-                            "raw": "http://localhost:8000/api/v1/tickets",
-                            "protocol": "http",
-                            "host": [
-                                "localhost"
-                            ],
-                            "port": "8000",
-                            "path": [
-                                "api",
-                                "v1",
-                                "tickets"
-                            ]
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Put Ticket",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{Bearer}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "PUT",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"title\": \"Billing issue for customer\",\n    \"description\": \"Customer reports double charge on invoice #12345. Please investigate and refund if needed.\",\n    \"priority\": \"urgent\",\n    \"status\": \"open\",\n    \"user_id\": 4,\n    \"assigned_to\":2\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        },
-                        "url": {
-                            "raw": "http://localhost:8000/api/v1/tickets/2",
-                            "protocol": "http",
-                            "host": [
-                                "localhost"
-                            ],
-                            "port": "8000",
-                            "path": [
-                                "api",
-                                "v1",
-                                "tickets",
-                                "2"
-                            ]
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Patch Ticket",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{Bearer}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "PATCH",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{ \n  \"title\" : \"Neque ut est est mollitia sint\",\n  \"description\" : \"Excepturi numquam necessitatibus et sit. Laudantium consectetur et quae assumenda cum. Ut vel cum sunt totam natus. A quidem animi non eligendi rerum et sapiente. Repellendus cum sunt aperiam\",\n  \"status\" : \"open\"\n}\n",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        },
-                        "url": {
-                            "raw": "http://localhost:8000/api/v1/tickets/2",
-                            "protocol": "http",
-                            "host": [
-                                "localhost"
-                            ],
-                            "port": "8000",
-                            "path": [
-                                "api",
-                                "v1",
-                                "tickets",
-                                "2"
-                            ]
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Delete Ticket",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{Bearer}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "DELETE",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        },
-                        "url": {
-                            "raw": "http://localhost:8000/api/v1/tickets/31",
-                            "protocol": "http",
-                            "host": [
-                                "localhost"
-                            ],
-                            "port": "8000",
-                            "path": [
-                                "api",
-                                "v1",
-                                "tickets",
-                                "31"
-                            ]
-                        }
-                    },
-                    "response": []
-                }
-            ]
-        },
-        {
-            "name": "Ticket Comment",
-            "item": [
-                {
-                    "name": "Get Tickets Comments",
-                    "protocolProfileBehavior": {
-                        "disableBodyPruning": true
-                    },
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{Bearer}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        },
-                        "url": {
-                            "raw": "http://localhost:8000/api/v1/tickets/7/comments",
-                            "protocol": "http",
-                            "host": [
-                                "localhost"
-                            ],
-                            "port": "8000",
-                            "path": [
-                                "api",
-                                "v1",
-                                "tickets",
-                                "7",
-                                "comments"
-                            ]
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Create Internal Comment",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{Bearer}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"body\": \"Internal note: Customer was refunded.\",\n  \"is_internal\": true\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        },
-                        "url": {
-                            "raw": "http://localhost:8000/api/v1/tickets/7/comments",
-                            "protocol": "http",
-                            "host": [
-                                "localhost"
-                            ],
-                            "port": "8000",
-                            "path": [
-                                "api",
-                                "v1",
-                                "tickets",
-                                "7",
-                                "comments"
-                            ]
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Post comment",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{Bearer}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"body\": \"Customer reports double charge on invoice #12345. Please investigate and refund if needed.\"\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        },
-                        "url": {
-                            "raw": "http://localhost:8000/api/v1/tickets/3/comments",
-                            "protocol": "http",
-                            "host": [
-                                "localhost"
-                            ],
-                            "port": "8000",
-                            "path": [
-                                "api",
-                                "v1",
-                                "tickets",
-                                "3",
-                                "comments"
-                            ]
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Health",
-                    "protocolProfileBehavior": {
-                        "disableBodyPruning": true
-                    },
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{Bearer}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"body\": \"Customer reports double charge on invoice #12345. Please investigate and refund if needed.\"\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        },
-                        "url": {
-                            "raw": "http://localhost:8000/api/v1/health",
-                            "protocol": "http",
-                            "host": [
-                                "localhost"
-                            ],
-                            "port": "8000",
-                            "path": [
-                                "api",
-                                "v1",
-                                "health"
-                            ]
-                        }
-                    },
-                    "response": []
-                }
-            ]
-        },
-        {
-            "name": "User",
-            "item": [
-                {
-                    "name": "Get Users",
-                    "protocolProfileBehavior": {
-                        "disableBodyPruning": true
-                    },
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{Bearer}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"body\": \"Customer reports double charge on invoice #12345. Please investigate and refund if needed.\",\n    \"is_internal\": 1\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        },
-                        "url": {
-                            "raw": "http://localhost:8000/api/v1/users",
-                            "protocol": "http",
-                            "host": [
-                                "localhost"
-                            ],
-                            "port": "8000",
-                            "path": [
-                                "api",
-                                "v1",
-                                "users"
-                            ]
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Get User",
-                    "protocolProfileBehavior": {
-                        "disableBodyPruning": true
-                    },
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{Bearer}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        },
-                        "url": {
-                            "raw": "http://localhost:8000/api/v1/users/4",
-                            "protocol": "http",
-                            "host": [
-                                "localhost"
-                            ],
-                            "port": "8000",
-                            "path": [
-                                "api",
-                                "v1",
-                                "users",
-                                "4"
-                            ]
-                        }
-                    },
-                    "response": []
-                }
-            ]
-        },
-        {
-            "name": "Error Examples",
-            "item": [
-                {
-                    "name": "login with agent so not create ticket",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{Bearer}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"title\": \"Billing issue for customer\",\n  \"description\": \"Customer reports double charge on invoice #12345. Please investigate and refund if needed.\",\n  \"priority\": \"urgent\"\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        },
-                        "url": {
-                            "raw": "http://localhost:8000/api/v1/tickets",
-                            "protocol": "http",
-                            "host": [
-                                "localhost"
-                            ],
-                            "port": "8000",
-                            "path": [
-                                "api",
-                                "v1",
-                                "tickets"
-                            ]
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Login with user so not create internal comment error forbidden",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{Bearer}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"body\": \"Internal note: Customer was refunded.\",\n  \"is_internal\": true\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        },
-                        "url": {
-                            "raw": "http://localhost:8000/api/v1/tickets/7/comments",
-                            "protocol": "http",
-                            "host": [
-                                "localhost"
-                            ],
-                            "port": "8000",
-                            "path": [
-                                "api",
-                                "v1",
-                                "tickets",
-                                "7",
-                                "comments"
-                            ]
-                        }
-                    },
-                    "response": []
-                }
-            ]
-        }
+  "info": {
+    "name": "Helpdesk Ticket API",
+    "description": "API collection for Helpdesk Ticket Management System",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
     ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Create Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"token\", jsonData.data.token);",
+                  "    pm.collectionVariables.set(\"token\", jsonData.data.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"password\",\n  \"device_name\": \"Postman\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/token",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "token"]
+            }
+          }
+        },
+        {
+          "name": "Revoke Token",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/token",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "token"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tickets",
+      "item": [
+        {
+          "name": "List Tickets",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/tickets",
+              "host": ["{{base_url}}"],
+              "path": ["tickets"]
+            }
+          }
+        },
+        {
+          "name": "List Tickets with Includes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/tickets?include=customer,assignedAgent,comments",
+              "host": ["{{base_url}}"],
+              "path": ["tickets"],
+              "query": [
+                {
+                  "key": "include",
+                  "value": "customer,assignedAgent,comments"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Tickets with Filters",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/tickets?filter[status]=open&filter[priority]=high",
+              "host": ["{{base_url}}"],
+              "path": ["tickets"],
+              "query": [
+                {
+                  "key": "filter[status]",
+                  "value": "open"
+                },
+                {
+                  "key": "filter[priority]",
+                  "value": "high"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Tickets with Sorting",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/tickets?sort=-created_at",
+              "host": ["{{base_url}}"],
+              "path": ["tickets"],
+              "query": [
+                {
+                  "key": "sort",
+                  "value": "-created_at"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Ticket",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Payment failed\",\n  \"description\": \"I paid for the plan, but my account is not upgraded. Please help me resolve this issue.\",\n  \"priority\": \"high\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/tickets",
+              "host": ["{{base_url}}"],
+              "path": ["tickets"]
+            }
+          }
+        },
+        {
+          "name": "Show Ticket",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/tickets/1?include=customer,comments",
+              "host": ["{{base_url}}"],
+              "path": ["tickets", "1"],
+              "query": [
+                {
+                  "key": "include",
+                  "value": "customer,comments"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Ticket (PATCH)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"in_progress\",\n  \"priority\": \"urgent\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/tickets/1",
+              "host": ["{{base_url}}"],
+              "path": ["tickets", "1"]
+            }
+          }
+        },
+        {
+          "name": "Replace Ticket (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated ticket title\",\n  \"description\": \"This is a complete replacement of the ticket with all required fields.\",\n  \"status\": \"resolved\",\n  \"priority\": \"medium\",\n  \"assigned_to\": 2\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/tickets/1",
+              "host": ["{{base_url}}"],
+              "path": ["tickets", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete Ticket",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/tickets/1",
+              "host": ["{{base_url}}"],
+              "path": ["tickets", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Ticket Comments",
+      "item": [
+        {
+          "name": "List Comments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/tickets/1/comments",
+              "host": ["{{base_url}}"],
+              "path": ["tickets", "1", "comments"]
+            }
+          }
+        },
+        {
+          "name": "Create Comment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"body\": \"This issue has been resolved. Thank you for your patience.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/tickets/1/comments",
+              "host": ["{{base_url}}"],
+              "path": ["tickets", "1", "comments"]
+            }
+          }
+        },
+        {
+          "name": "Create Internal Comment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"body\": \"Internal note: Customer was refunded.\",\n  \"is_internal\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/tickets/1/comments",
+              "host": ["{{base_url}}"],
+              "path": ["tickets", "1", "comments"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "List Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users",
+              "host": ["{{base_url}}"],
+              "path": ["users"]
+            }
+          }
+        },
+        {
+          "name": "Show User",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/1",
+              "host": ["{{base_url}}"],
+              "path": ["users", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": ["{{base_url}}"],
+              "path": ["health"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Error Examples",
+      "item": [
+        {
+          "name": "Unauthorized Request",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/tickets",
+              "host": ["{{base_url}}"],
+              "path": ["tickets"]
+            }
+          }
+        },
+        {
+          "name": "Validation Error",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Bad\",\n  \"description\": \"Too short\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/tickets",
+              "host": ["{{base_url}}"],
+              "path": ["tickets"]
+            }
+          }
+        },
+        {
+          "name": "Unsupported Sort Field",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/tickets?sort=invalid_field",
+              "host": ["{{base_url}}"],
+              "path": ["tickets"],
+              "query": [
+                {
+                  "key": "sort",
+                  "value": "invalid_field"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
 }

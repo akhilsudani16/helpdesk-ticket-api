@@ -17,7 +17,7 @@ enum UserRole: string
     }
 
     /**
-     * Get a role display name.
+     * Get role display name.
      */
     public function label(): string
     {
@@ -26,5 +26,29 @@ enum UserRole: string
             self::AGENT => 'Support Agent',
             self::CUSTOMER => 'Customer',
         };
+    }
+
+    /**
+     * Check if role is admin.
+     */
+    public function isAdmin(): bool
+    {
+        return $this === self::ADMIN;
+    }
+
+    /**
+     * Check if role is agent.
+     */
+    public function isAgent(): bool
+    {
+        return $this === self::AGENT;
+    }
+
+    /**
+     * Check if role is customer.
+     */
+    public function isCustomer(): bool
+    {
+        return $this === self::CUSTOMER;
     }
 }

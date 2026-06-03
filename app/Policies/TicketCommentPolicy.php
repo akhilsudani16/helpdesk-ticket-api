@@ -6,7 +6,6 @@ use App\Models\Ticket;
 use App\Models\TicketComment;
 use App\Models\User;
 use App\Permissions\V1\Abilities;
-use Illuminate\Auth\Access\AuthorizationException;
 
 class TicketCommentPolicy
 {
@@ -16,13 +15,7 @@ class TicketCommentPolicy
     public function viewAny(User $user, Ticket $ticket): bool
     {
         // User must be able to view the ticket to view its comments
-        if ($user->tokenCan(Abilities::ViewComments) && $user->can('view', $ticket)) {
-            return true;
-        }
-
-        throw new AuthorizationException(
-            __('validation.ticket_view_comment_permission_denied')
-        );
+        return $user->tokenCan(Abilities::ViewComments) && $user->can('view', $ticket);
     }
 
     /**
@@ -36,13 +29,7 @@ class TicketCommentPolicy
         }
 
         // Customers can only see public comments
-        if (!$comment->is_internal) {
-            return true;
-        }
-
-        throw new AuthorizationException(
-            __('validation.internal_comment_permission_denied')
-        );
+        return !$comment->is_internal;
     }
 
     /**
@@ -51,13 +38,7 @@ class TicketCommentPolicy
     public function create(User $user, Ticket $ticket): bool
     {
         // User must be able to view the ticket to comment on it
-        if ($user->tokenCan(Abilities::CreateComment) && $user->can('view', $ticket)) {
-            return true;
-        }
-
-        throw new AuthorizationException(
-            __('validation.ticket_comment_create_permission_denied')
-        );
+        return $user->tokenCan(Abilities::CreateComment) && $user->can('view', $ticket);
     }
 
     /**
@@ -65,13 +46,8 @@ class TicketCommentPolicy
      */
     public function createInternal(User $user): bool
     {
-        if ($user->tokenCan(Abilities::CreateInternalComment) && ($user->isAdmin() || $user->isAgent())) {
-            return true;
-        }
-
-        throw new AuthorizationException(
-            __('validation.internal_comment_create_permission_denied')
-        );
+        return $user->tokenCan(Abilities::CreateInternalComment) &&
+               ($user->isAdmin() || $user->isAgent());
     }
 
     /**
@@ -84,13 +60,12 @@ class TicketCommentPolicy
             return true;
         }
 
-        // Users can delete their own comments
-        if ($comment->user_id === $user->id) {
+        // Agent can delete comments on tickets they're assigned to
+        if ($user->isAgent() && $comment->ticket?->assigned_to === $user->id) {
             return true;
         }
 
-        throw new AuthorizationException(
-            __('validation.comment_delete_permission_denied')
-        );
+        // User can delete their own comments
+        return $comment->user_id === $user->id;
     }
 }

@@ -28,15 +28,18 @@ return Application::configure(basePath: dirname(__DIR__))
                     return response()->json([
                         'status' => 'error',
                         'message' => 'Validation failed.',
+                        'data' => null,
                         'errors' => $e->errors(),
                     ], 422);
                 }
 
-                // Handle model didn't find exceptions
+                // Handle model not found exceptions
                 if ($e instanceof ModelNotFoundException) {
                     return response()->json([
                         'status' => 'error',
                         'message' => 'Resource not found.',
+                        'data' => null,
+                        'errors' => null,
                     ], 404);
                 }
 
@@ -44,7 +47,9 @@ return Application::configure(basePath: dirname(__DIR__))
                 if ($e instanceof AuthorizationException) {
                     return response()->json([
                         'status' => 'error',
-                        'message' => $e->getMessage() ?: 'This action is forbidden.',
+                        'message' => 'This action is forbidden.',
+                        'data' => null,
+                        'errors' => null,
                     ], 403);
                 }
 
@@ -53,6 +58,8 @@ return Application::configure(basePath: dirname(__DIR__))
                     return response()->json([
                         'status' => 'error',
                         'message' => 'Unauthenticated.',
+                        'data' => null,
+                        'errors' => null,
                     ], 401);
                 }
 
@@ -61,6 +68,8 @@ return Application::configure(basePath: dirname(__DIR__))
                     return response()->json([
                         'status' => 'error',
                         'message' => $e->getMessage() ?: 'An error occurred.',
+                        'data' => null,
+                        'errors' => null,
                     ], $e->getStatusCode());
                 }
 
@@ -69,6 +78,8 @@ return Application::configure(basePath: dirname(__DIR__))
                     return response()->json([
                         'status' => 'error',
                         'message' => 'An unexpected error occurred.',
+                        'data' => null,
+                        'errors' => null,
                     ], 500);
                 }
             }

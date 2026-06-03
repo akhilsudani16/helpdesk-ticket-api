@@ -25,7 +25,7 @@ A production-style REST API built with Laravel for managing support tickets. Thi
 - ✅ API versioning (`/api/v1`)
 - ✅ Laravel Sanctum token authentication
 - ✅ Token revocation and expiration awareness
-- ✅ API Resources and Resource Collections[README.md](README.md)
+- ✅ API Resources and Resource Collections
 - ✅ Conditional includes for relationships
 - ✅ Query filters and sorting
 - ✅ Nested resources (ticket comments)

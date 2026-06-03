@@ -21,6 +21,7 @@ class UserResource extends JsonResource
             'role' => $this->role,
             'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
             'updated_at' => $this->updated_at?->format('Y-m-d H:i:s'),
+            // Note: password, remember_token, and other sensitive fields are NOT exposed
         ];
     }
 }

@@ -4,29 +4,35 @@ namespace App\Support\Filters;
 
 use App\Enums\TicketPriority;
 use App\Enums\TicketStatus;
-use App\Exceptions\InvalidQueryParameterException;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
 class TicketFilter
 {
     protected Request $request;
     protected User $user;
     protected array $allowedFilters;
+    protected IncludeValidator $includeValidator;
+    protected SortValidator $sortValidator;
 
     public function __construct(Request $request)
     {
         $this->request = $request;
         $this->user = Auth::user();
         $this->setAllowedFilters();
+        
+        // Initialize validators
+        $this->includeValidator = new IncludeValidator($request);
+        $this->sortValidator = new SortValidator($request);
     }
 
     /**
-     * Set allowed filters based on a user role.
+     * Set allowed filters based on user role.
      */
-    private function setAllowedFilters(): void
+    protected function setAllowedFilters(): void
     {
         if ($this->user->isAdmin()) {
             $this->allowedFilters = [
@@ -47,6 +53,7 @@ class TicketFilter
                 'created_after',
             ];
         } else {
+            // Customer
             $this->allowedFilters = [
                 'status',
                 'priority',
@@ -56,234 +63,148 @@ class TicketFilter
     }
 
     /**
-     * Apply filters and sorting to the query.
-     * @throws InvalidQueryParameterException
+     * Apply filters, includes, and sorting to the query.
+     * 
+     * @throws ValidationException
      */
     public function apply(Builder $query): Builder
     {
-        // Apply role-based scoping
-        $this->applyRoleScope($query);
+        // Apply user-specific scoping
+        $this->applyUserScoping($query);
 
-        // Validate and apply includes
-        $this->validateAndApplyIncludes($query);
+        // Apply includes (eager loading)
+        $this->includeValidator->apply($query);
 
-        $filters = $this->request->query('filter', []);
-        if (is_array($filters)) {
-            $this->applyFilters($query, $filters);
-        }
+        // Apply filters
+        $this->applyFilters($query);
 
-        $this->applySort($query);
+        // Apply sorting
+        $this->sortValidator->apply($query);
 
         return $query;
     }
 
     /**
-     * Apply role-based query scoping.
+     * Apply user role-based query scoping.
      */
-    private function applyRoleScope(Builder $query): void
+    protected function applyUserScoping(Builder $query): void
     {
-        if ($this->user->isCustomer()) {
-            // Customers can only see their own tickets
-            $query->where('user_id', $this->user->id);
-        } elseif ($this->user->isAgent()) {
-            // Agents can only see tickets assigned to them
+        if ($this->user->isAgent()) {
             $query->where('assigned_to', $this->user->id);
+        } elseif ($this->user->isCustomer()) {
+            $query->where('user_id', $this->user->id);
         }
-        // Admins can see all tickets
-    }
-
-    /**
-     * Validate and apply includes.
-     */
-    private function validateAndApplyIncludes(Builder $query): void
-    {
-        $includeParam = $this->request->query('include', '');
-
-        if (empty($includeParam)) {
-            // Default includes for list view
-            $query->with(['customer', 'assignedAgent']);
-            return;
-        }
-
-        $allowedIncludes = ['customer', 'assignedAgent', 'comments'];
-        $requestedIncludes = array_filter(array_map('trim', explode(',', $includeParam)));
-
-        // Check for unsupported includes
-        $unsupportedIncludes = array_diff($requestedIncludes, $allowedIncludes);
-
-        if (!empty($unsupportedIncludes)) {
-            throw new InvalidQueryParameterException([
-                'include' => __('validation.unsupported_include') . implode(', ', $unsupportedIncludes) . __('validation.allowed') . implode(', ', $allowedIncludes),
-            ], __('validation.unsupported_include'));
-        }
-
-        // Build relationship array
-        $relationships = [];
-
-        if (in_array('customer', $requestedIncludes)) {
-            $relationships[] = 'customer';
-        }
-
-        if (in_array('assignedAgent', $requestedIncludes)) {
-            $relationships[] = 'assignedAgent';
-        }
-
-        if (in_array('comments', $requestedIncludes)) {
-            $relationships[] = 'comments.user';
-        }
-
-        // Apply eager loading
-        if (!empty($relationships)) {
-            $query->with($relationships);
-        }
+        // Admin has no restrictions
     }
 
     /**
      * Apply filter conditions.
+     * 
+     * @throws ValidationException
      */
-    private function applyFilters(Builder $query, array $filters): void
+    protected function applyFilters(Builder $query): void
     {
-        $unsupportedFilters = array_diff(array_keys($filters), $this->allowedFilters);
-        if (!empty($unsupportedFilters)) {
-            throw new InvalidQueryParameterException([
-                'filter' => __('validation.unsupported_filter') . implode(', ', $unsupportedFilters),
-            ]);
-        }
+        $filters = $this->request->query('filter', []);
 
-        foreach ($filters as $filter => $value) {
-            if (method_exists($this, $filter)) {
-                $this->$filter($query, $value);
-            }
-        }
-    }
-
-    /**
-     * Apply sorting.
-     */
-    private function applySort(Builder $query): void
-    {
-        $sortParam = $this->request->query('sort');
-        if (!$sortParam) {
+        if (!is_array($filters) || empty($filters)) {
             return;
         }
 
-        $allowedSorts = ['created_at', 'updated_at', 'priority', 'status'];
+        $this->validateFilters($filters);
 
-        // Support multiple sort fields separated by a comma
-        foreach (explode(',', $sortParam) as $sort) {
-            $sort = trim($sort);
-            if (empty($sort)) {
-                continue;
+        // Filter by status
+        if (!empty($filters['status'])) {
+            $this->validateEnum($filters['status'], TicketStatus::values(), 'status');
+            $query->where('status', $filters['status']);
+        }
+
+        // Filter by priority
+        if (!empty($filters['priority'])) {
+            $this->validateEnum($filters['priority'], TicketPriority::values(), 'priority');
+            $query->where('priority', $filters['priority']);
+        }
+
+        // Filter by customer
+        if (isset($filters['customer_id']) || isset($filters['customer'])) {
+            $customerId = $filters['customer_id'] ?? $filters['customer'];
+            if (!empty($customerId)) {
+                $this->validateNumeric($customerId, 'customer_id');
+                $query->where('user_id', $customerId);
             }
+        }
 
-            $direction = 'asc';
-            $field = $sort;
-
-            if (str_starts_with($sort, '-')) {
-                $direction = 'desc';
-                $field = substr($sort, 1);
+        // Filter by assigned agent
+        if (isset($filters['assigned_to']) || isset($filters['assigned_agent'])) {
+            $agentId = $filters['assigned_to'] ?? $filters['assigned_agent'];
+            if (!empty($agentId)) {
+                $this->validateNumeric($agentId, 'assigned_to');
+                $query->where('assigned_to', $agentId);
             }
+        }
 
-            if (!in_array($field, $allowedSorts, true)) {
-                throw new InvalidQueryParameterException([
-                    'sort' => "Invalid sort field: {$field}. Allowed: " . implode(', ', $allowedSorts),
-                ]);
-            }
-
-            $query->orderBy($field, $direction);
+        // Filter by created after
+        if (!empty($filters['created_after'])) {
+            $this->validateDate($filters['created_after']);
+            $query->where('created_at', '>=', $filters['created_after'] . ' 00:00:00');
         }
     }
 
     /**
-     * Filter by status.
+     * Validate filters are allowed for current user.
+     * 
+     * @throws ValidationException
      */
-    protected function status(Builder $query, string $value): void
+    protected function validateFilters(array $filters): void
     {
-        if (!in_array($value, TicketStatus::values(), true)) {
-            throw new InvalidQueryParameterException([
-                'filter.status' => "Invalid status: {$value}",
+        $unsupportedFilters = array_diff(array_keys($filters), $this->allowedFilters);
+
+        if (!empty($unsupportedFilters)) {
+            throw ValidationException::withMessages([
+                'filter' => ['Unsupported filter(s): ' . implode(', ', $unsupportedFilters)]
             ]);
         }
-
-        $query->where('status', $value);
     }
 
     /**
-     * Filter by priority.
+     * Validate enum values.
+     * 
+     * @throws ValidationException
      */
-    protected function priority(Builder $query, string $value): void
+    protected function validateEnum(string $value, array $allowed, string $field): void
     {
-        if (!in_array($value, TicketPriority::values(), true)) {
-            throw new InvalidQueryParameterException([
-                'filter.priority' => "Invalid priority: {$value}",
+        if (!in_array($value, $allowed, true)) {
+            throw ValidationException::withMessages([
+                "filter.{$field}" => ["Invalid {$field}: {$value}. Allowed: " . implode(', ', $allowed)]
             ]);
         }
-
-        $query->where('priority', $value);
     }
 
     /**
-     * Filter by customer ID.
-     * @throws InvalidQueryParameterException
+     * Validate numeric values.
+     * 
+     * @throws ValidationException
      */
-    protected function customer_id(Builder $query, string $value): void
+    protected function validateNumeric(string $value, string $field): void
     {
-        $this->validateNumericFilter($value, 'customer_id');
-        $query->where('user_id', $value);
+        if (!ctype_digit($value) || (int) $value < 1) {
+            throw ValidationException::withMessages([
+                "filter.{$field}" => ["The {$field} must be a valid positive number"]
+            ]);
+        }
     }
 
     /**
-     * Filter by customer ID alias.
-     * @throws InvalidQueryParameterException
+     * Validate date values.
+     * 
+     * @throws ValidationException
      */
-    protected function customer(Builder $query, string $value): void
-    {
-        $this->customer_id($query, $value);
-    }
-
-    /**
-     * Filter by assigned agent.
-     * @throws InvalidQueryParameterException
-     */
-    protected function assigned_to(Builder $query, string $value): void
-    {
-        $this->validateNumericFilter($value, 'assigned_to');
-        $query->where('assigned_to', $value);
-    }
-
-    /**
-     * Filter by assigned agent alias.
-     * @throws InvalidQueryParameterException
-     */
-    protected function assigned_agent(Builder $query, string $value): void
-    {
-        $this->assigned_to($query, $value);
-    }
-
-    /**
-     * Filter by created after date.
-     */
-    protected function created_after(Builder $query, string $value): void
+    protected function validateDate(string $value): void
     {
         $date = \DateTime::createFromFormat('Y-m-d', $value);
 
         if (!$date || $date->format('Y-m-d') !== $value) {
-            throw new InvalidQueryParameterException([
-                'filter.created_after' => 'Invalid date format (YYYY-MM-DD)',
-            ]);
-        }
-
-        $query->where('created_at', '>=', $value . ' 00:00:00');
-    }
-
-    /**
-     * Validate numeric filter values.
-     */
-    private function validateNumericFilter(string $value, string $field): void
-    {
-        if (!ctype_digit($value) || (int) $value < 1) {
-            throw new InvalidQueryParameterException([
-                "filter.{$field}" => "Invalid {$field}",
+            throw ValidationException::withMessages([
+                'filter.created_after' => ['Invalid date format. Use YYYY-MM-DD']
             ]);
         }
     }
