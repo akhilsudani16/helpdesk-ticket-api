@@ -52,10 +52,6 @@ class TicketController extends Controller
     {
         Gate::authorize('create', Ticket::class);
 
-        if ($request->user()->isAgent()) {
-            return ApiResponse::forbidden(__('messages.tickets.cannot_create_ticket'));
-        }
-
         $ticket = Ticket::create($request->validated());
 
         return ApiResponse::success(

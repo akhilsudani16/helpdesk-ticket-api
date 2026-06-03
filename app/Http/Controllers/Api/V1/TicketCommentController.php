@@ -10,6 +10,7 @@ use App\Models\Ticket;
 use App\Models\TicketComment;
 use App\Support\ApiResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 
 /**
@@ -40,7 +41,7 @@ class TicketCommentController extends Controller
         }
 
         return ApiResponse::success(
-            new TicketCollection($query->paginate(), 'comments'),
+            new TicketCollection($query->paginate(5), 'comments'),
             __('messages.comments.retrieved')
         );
     }
@@ -57,31 +58,34 @@ class TicketCommentController extends Controller
      * @bodyParam body string required Comment text. Example: This issue has been resolved.
      * @bodyParam is_internal boolean Whether the comment is internal. Example: false
      */
-    public function store(StoreTicketCommentRequest $request, Ticket $ticket)
-    {
-        Gate::authorize('create', [TicketComment::class, $ticket]);
+     public function store(StoreTicketCommentRequest $request, Ticket $ticket)
+     {
+         Gate::authorize('create', [TicketComment::class, $ticket]);
 
-        if ($request->user()->isCustomer()) {
-            return ApiResponse::forbidden(__('messages.errors.customers_cannot_create_comments'));
-        }
+         $data = $request->validated();
 
-        $data = $request->validated();
-        $isInternal = $data['is_internal'] ?? false;
+         // Determine is_internal based on user role
+         if (Auth::user()->isAdmin() || Auth::user()->isAgent()) {
+             $isInternal = true;
+         } else {
+             $isInternal = false;
+         }
 
-        if ($isInternal) {
-            Gate::authorize('createInternal', TicketComment::class);
-        }
+         if ($isInternal) {
+             Gate::authorize('createInternal', TicketComment::class);
+         }
 
-        $comment = $ticket->comments()->create([
-            'user_id' => $request->user()->id,
-            'body' => $data['body'],
-            'is_internal' => $isInternal,
-        ]);
+         $comment = $ticket->comments()->create([
+             'user_id' => $request->user()->id,
+             'body' => $data['body'],
+             'is_internal' => $isInternal,
+         ]);
 
-        $comment->load('user');
 
-        return ApiResponse::success(new TicketCommentResource($comment), __('messages.comments.created'), 201);
-    }
+         $comment->load('user');
+
+         return ApiResponse::success(new TicketCommentResource($comment), __('messages.comments.created'), 201);
+     }
 
     /**
      * Delete ticket comment

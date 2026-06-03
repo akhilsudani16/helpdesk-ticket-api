@@ -7,6 +7,7 @@ use App\Enums\TicketStatus;
 use App\Enums\UserRole;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
 class UpdateTicketRequest extends FormRequest
@@ -26,7 +27,7 @@ class UpdateTicketRequest extends FormRequest
      */
     public function rules(): array
     {
-        $user = $this->user();
+        $user = Auth::user();
 
         $rules = [
             'title' => ['sometimes', 'string', 'min:5', 'max:120'],

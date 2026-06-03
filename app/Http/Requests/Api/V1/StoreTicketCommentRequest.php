@@ -4,6 +4,7 @@ namespace App\Http\Requests\Api\V1;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class StoreTicketCommentRequest extends FormRequest
 {
@@ -23,8 +24,7 @@ class StoreTicketCommentRequest extends FormRequest
     public function rules(): array
     { // todo: is_internal manage by us
         return [
-            'body' => ['required', 'string', 'min:3', 'max:2000'],
-            'is_internal' => ['sometimes', 'boolean'],
+            'body' => ['required', 'string', 'min:3', 'max:2000']
         ];
     }
 
@@ -34,7 +34,7 @@ class StoreTicketCommentRequest extends FormRequest
     public function validated($key = null, $default = null)
     {
         $validated = parent::validated($key, $default);
-        $user = $this->user();
+        $user = Auth::user();
 
         // Remove is_internal for customers
         if ($user && $user->isCustomer()) {

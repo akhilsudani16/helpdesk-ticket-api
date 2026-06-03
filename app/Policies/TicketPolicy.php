@@ -5,6 +5,8 @@ namespace App\Policies;
 use App\Models\Ticket;
 use App\Models\User;
 use App\Permissions\V1\Abilities;
+use App\Support\ApiResponse;
+use Illuminate\Auth\Access\Response;
 
 class TicketPolicy
 {
@@ -40,6 +42,9 @@ class TicketPolicy
      */
     public function create(User $user): bool
     {
+        if ($user->isAgent()) {
+            return false;
+        }
         return $user->tokenCan(Abilities::CreateTicket);
     }
 

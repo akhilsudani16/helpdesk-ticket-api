@@ -18,11 +18,8 @@ class ApiResponse
             'status' => 'success',
             'message' => $message ?? __('messages.success'),
             'data' => $data,
+            'errors' => null,
         ];
-
-        if (!request()->wantsJson() || request()->expectsJson()) {
-            $response['errors'] = null;
-        }
 
         return response()->json($response, $statusCode);
     }

@@ -6,6 +6,7 @@ use App\Enums\TicketPriority;
 use App\Models\User;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
 class StoreTicketRequest extends FormRequest
@@ -35,12 +36,12 @@ class StoreTicketRequest extends FormRequest
                 'exists:users,id',
                 function ($attribute, $value, $fail) {
                     // Non-admins can only create tickets for themselves
-                    if (!$this->user()->isAdmin() && $value != $this->user()->id) {
+                    if (!Auth::user()->isAdmin() && $value != Auth::user()->id) {
                         $fail('You cannot create tickets for other users.');
                     }
 
                     // Admins can only create tickets for customers
-                    if ($this->user()->isAdmin()) {
+                    if (Auth::user()->isAdmin()) {
                         $user = User::find($value);
                         if ($user && ($user->isAdmin() || $user->isAgent())) {
                             $fail('Tickets can only be created for customers.');
@@ -57,13 +58,13 @@ class StoreTicketRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         // If user is a customer and doesn't provide user_id, use their own
-        if (!$this->user()->isAdmin() && !$this->has('user_id')) {
+        if (!Auth::user()->isAdmin() && !$this->has('user_id')) {
             $this->merge([
                 'user_id' => $this->user()->id
             ]);
         }
         // If admin doesn't provide user_id, use their own
-        elseif ($this->user()->isAdmin() && !$this->has('user_id')) {
+        elseif (Auth::user()->isAdmin() && !$this->has('user_id')) {
             $this->merge([
                 'user_id' => $this->user()->id
             ]);

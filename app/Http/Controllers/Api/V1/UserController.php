@@ -44,9 +44,6 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        if($user->isCustomer()){
-            return ApiResponse::forbidden(__('messages.users.cannot_view_customer'));
-        }
         Gate::authorize('view', $user);
 
         return ApiResponse::success(new UserResource($user), __('messages.users.show'));
