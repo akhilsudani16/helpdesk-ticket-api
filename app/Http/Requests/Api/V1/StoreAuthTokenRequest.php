@@ -25,7 +25,6 @@ class StoreAuthTokenRequest extends FormRequest
     public function rules(): array
     {
         return [
-            // 'email' => ['required', 'email:rfc,dns'],
             'email' => ['required', 'email'],
             'password' => ['required', 'string'],
             'device_name' => ['required', 'string', Rule::in(DeviceName::values())],

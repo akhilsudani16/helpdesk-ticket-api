@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\ReplaceTicketRequest;
 use App\Http\Requests\Api\V1\StoreTicketRequest;
 use App\Http\Requests\Api\V1\UpdateTicketRequest;
+use App\Http\Resources\V1\TicketCollection;
 use App\Http\Resources\V1\TicketResource;
 use App\Models\Ticket;
 use App\Support\ApiResponse;
@@ -33,9 +34,9 @@ class TicketController extends Controller
         Gate::authorize('viewAny', Ticket::class);
 
         return ApiResponse::success(
-            TicketResource::collection(
+            new TicketCollection(
                 Ticket::filter(new TicketFilter($request))->paginate()
-            )->toArray($request),
+            ),
             __('messages.tickets.retrieved')
         );
     }
@@ -89,7 +90,7 @@ class TicketController extends Controller
         Gate::authorize('update', $ticket);
 
         $ticket->update($request->validated());
-        
+
         return ApiResponse::success(
             (new TicketResource($ticket))->toArray($request),
             __('messages.tickets.updated')
@@ -113,7 +114,7 @@ class TicketController extends Controller
         }
 
         $ticket->update($request->validated());
-        
+
         return ApiResponse::success(
             (new TicketResource($ticket))->toArray($request),
             __('messages.tickets.replaced')
@@ -132,7 +133,7 @@ class TicketController extends Controller
         Gate::authorize('delete', $ticket);
 
         $ticket->delete();
-        
+
         return ApiResponse::success(null, __('messages.tickets.deleted'));
     }
 }

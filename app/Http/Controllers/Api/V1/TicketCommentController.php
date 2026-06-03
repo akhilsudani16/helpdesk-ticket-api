@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\StoreTicketCommentRequest;
+use App\Http\Resources\V1\TicketCollection;
 use App\Http\Resources\V1\TicketCommentResource;
 use App\Models\Ticket;
 use App\Models\TicketComment;
@@ -13,19 +14,19 @@ use Illuminate\Support\Facades\Gate;
 
 /**
  * @group Ticket Comments
- * 
+ *
  * APIs for managing ticket comments
  */
 class TicketCommentController extends Controller
 {
     /**
      * List ticket comments
-     * 
+     *
      * Get all comments for a specific ticket.
      * Customers can only see public comments.
-     * 
+     *
      * @authenticated
-     * 
+     *
      * @urlParam ticket integer required The ticket ID. Example: 1
      */
     public function index(Request $request, Ticket $ticket)
@@ -38,17 +39,20 @@ class TicketCommentController extends Controller
             $query->where('is_internal', false);
         }
 
-        return ApiResponse::success(TicketCommentResource::collection($query->get()), __('messages.comments.retrieved'));
+        return ApiResponse::success(
+            new TicketCollection($query->paginate(), 'comments'),
+            __('messages.comments.retrieved')
+        );
     }
 
     /**
      * Create ticket comment
-     * 
+     *
      * Add a new comment to a ticket.
      * Customers can only create public comments.
-     * 
+     *
      * @authenticated
-     * 
+     *
      * @urlParam ticket integer required The ticket ID. Example: 1
      * @bodyParam body string required Comment text. Example: This issue has been resolved.
      * @bodyParam is_internal boolean Whether the comment is internal. Example: false
@@ -77,11 +81,11 @@ class TicketCommentController extends Controller
 
     /**
      * Delete ticket comment
-     * 
+     *
      * Delete a comment from a ticket.
-     * 
+     *
      * @authenticated
-     * 
+     *
      * @urlParam ticket integer required The ticket ID. Example: 1
      * @urlParam comment integer required The comment ID. Example: 1
      */
